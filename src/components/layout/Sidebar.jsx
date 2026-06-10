@@ -1,5 +1,271 @@
-function Sidebar() {
-  return <div>Sidebar</div>;
-}
+import { NavLink, useLocation } from "react-router-dom";
 
-export default Sidebar;
+const navItems = [
+  {
+    label: "Dashboard",
+    icon: "ti-layout-dashboard",
+    path: "/",
+  },
+  {
+    label: "Surat Masuk",
+    icon: "ti-mail-down",
+    path: "/surat-masuk",
+  },
+  {
+    label: "Surat Keluar",
+    icon: "ti-mail-up",
+    path: "/surat-keluar",
+  },
+  {
+    label: "Surat Keputusan",
+    icon: "ti-certificate",
+    path: "/sk",
+  },
+  {
+    label: "Surat Tugas",
+    icon: "ti-clipboard-list",
+    path: "/surat-tugas",
+  },
+  {
+    label: "Kontrak",
+    icon: "ti-writing",
+    path: "/kontrak",
+  },
+
+   {
+    label: "Retensi Arsip",
+    icon: "ti-calendar-time",
+    path: "/retensi",
+  },
+  {
+    label: "Klasifikasi",
+    icon: "ti-category",
+    path: "/klasifikasi",
+  },
+];
+
+export default function Sidebar({ collapsed, onToggle }) {
+  const location = useLocation();
+
+  return (
+    <aside
+      style={{
+        width: collapsed ? "72px" : "240px",
+        minHeight: "100vh",
+        background:
+          "linear-gradient(180deg, #0F2A4A 0%, #1B3F6E 60%, #1E4D8C 100%)",
+        display: "flex",
+        flexDirection: "column",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        zIndex: 100,
+        overflow: "hidden",
+        transition: "width .25s ease",
+        boxShadow: "2px 0 16px rgba(15,42,74,.18)",
+      }}
+    >
+      {/* HEADER */}
+      <div
+        style={{
+          height: "68px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          paddingLeft: "16px",
+          borderBottom: "1px solid rgba(255,255,255,.08)",
+        }}
+      >
+        <button
+          onClick={onToggle}
+          style={{
+            width: "40px",
+            height: "40px",
+            border: "none",
+            borderRadius: "10px",
+            background: "rgba(255,255,255,.08)",
+            color: "#FFFFFF",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: ".2s ease",
+          }}
+        >
+          <i
+            className="ti ti-menu-2"
+            style={{
+              fontSize: "22px",
+            }}
+          />
+        </button>
+      </div>
+
+      {/* LABEL */}
+      {!collapsed && (
+        <div
+          style={{
+            padding: "18px 20px 8px",
+            fontSize: "10px",
+            fontWeight: 600,
+            letterSpacing: ".12em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,.35)",
+          }}
+        >
+          Menu Utama
+        </div>
+      )}
+
+      {/* MENU */}
+      <nav
+        style={{
+          flex: 1,
+          paddingTop: "4px",
+        }}
+      >
+        {navItems.map((item) => {
+          const isActive =
+            location.pathname === item.path ||
+            (item.path !== "/" &&
+              location.pathname.startsWith(item.path));
+
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              title={collapsed ? item.label : ""}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: collapsed
+                  ? "12px 0"
+                  : "12px 16px",
+                margin: "4px 10px",
+                borderRadius: "10px",
+                textDecoration: "none",
+                color: isActive
+                  ? "#FFFFFF"
+                  : "rgba(255,255,255,.65)",
+                background: isActive
+                  ? "rgba(77,182,245,.18)"
+                  : "transparent",
+                borderLeft: isActive
+                  ? "3px solid #4DB6F5"
+                  : "3px solid transparent",
+                justifyContent: collapsed
+                  ? "center"
+                  : "flex-start",
+                transition: ".2s ease",
+                position: "relative",
+              }}
+            >
+              <i
+                className={`ti ${item.icon}`}
+                style={{
+                  fontSize: "20px",
+                  flexShrink: 0,
+                }}
+              />
+
+              {!collapsed && (
+                <span
+                  style={{
+                    fontFamily: "DM Sans",
+                    fontSize: "14px",
+                    fontWeight: isActive ? 600 : 500,
+                  }}
+                >
+                  {item.label}
+                </span>
+              )}
+
+              {collapsed && (
+                <span
+                  className="sidebar-tooltip"
+                  style={{
+                    position: "absolute",
+                    left: "calc(100% + 12px)",
+                    background: "#0F2A4A",
+                    color: "#FFFFFF",
+                    fontSize: "12px",
+                    padding: "6px 10px",
+                    borderRadius: "6px",
+                    whiteSpace: "nowrap",
+                    opacity: 0,
+                    pointerEvents: "none",
+                    transition: ".2s",
+                    zIndex: 999,
+                  }}
+                >
+                  {item.label}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      {/* FOOTER */}
+      <div
+        style={{
+          padding: "12px 10px",
+          borderTop: "1px solid rgba(255,255,255,.08)",
+        }}
+      >
+        <NavLink
+          to="/settings"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "10px 12px",
+            borderRadius: "10px",
+            textDecoration: "none",
+            color: "rgba(255,255,255,.65)",
+            justifyContent: collapsed
+              ? "center"
+              : "flex-start",
+          }}
+        >
+          <i
+            className="ti ti-settings"
+            style={{
+              fontSize: "20px",
+            }}
+          />
+
+          {!collapsed && (
+            <span
+              style={{
+                fontSize: "14px",
+                fontFamily: "DM Sans",
+              }}
+            >
+              Pengaturan
+            </span>
+          )}
+        </NavLink>
+      </div>
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css');
+
+        nav a:hover {
+          background: rgba(77,182,245,.10) !important;
+          color: #FFFFFF !important;
+        }
+
+        nav a:hover .sidebar-tooltip {
+          opacity: 1 !important;
+        }
+
+        button:hover {
+          background: rgba(255,255,255,.15) !important;
+        }
+      `}</style>
+    </aside>
+  );
+}
