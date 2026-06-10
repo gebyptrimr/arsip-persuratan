@@ -37,11 +37,7 @@ const navItems = [
     icon: "ti-calendar-time",
     path: "/retensi",
   },
-  {
-    label: "Klasifikasi",
-    icon: "ti-category",
-    path: "/klasifikasi",
-  },
+
 ];
 
 export default function Sidebar({ collapsed, onToggle }) {

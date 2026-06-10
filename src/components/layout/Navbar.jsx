@@ -107,7 +107,7 @@ export default function Navbar({ sidebarCollapsed }) {
             onChange={(e) =>
               setSearch(e.target.value)
             }
-            placeholder="Cari surat, perihal..."
+            placeholder="Cari nomor surat, perihal..."
             style={{
               width: "320px",
               height: "40px",

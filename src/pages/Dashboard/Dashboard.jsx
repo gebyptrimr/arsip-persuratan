@@ -1,11 +1,12 @@
 import "./Dashboard.css";
+import StatCards from "./StatCards";
 
 function Dashboard() {
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
         <div className="dashboard-title">
-          <h1>Dashboard Arsip</h1>
+          <h1>Dashboard</h1>
 
           <p>
             LP2M Universitas Negeri Makassar
@@ -31,8 +32,10 @@ function Dashboard() {
           </button>
         </div>
       </div>
+      <StatCards />
     </div>
   );
 }
+
 
 export default Dashboard;
