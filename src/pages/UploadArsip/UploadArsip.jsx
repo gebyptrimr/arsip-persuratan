@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const isAdmin = true;
 
@@ -7,52 +8,6 @@ const adminUser = {
   inisial: "HA",
   email: "hendra@lp2m.unm.ac.id",
 };
-
-const dataSK = [
-  {
-    id: 1,
-    nomorSK: "SK-001/2025",
-    judulSK: "Pengangkatan Tim Arsip",
-    tanggalSK: "2026-06-07",
-    pejabatPenetap: "Kepala Dinas",
-    file: "sk_001.pdf",
-  },
-  {
-    id: 2,
-    nomorSK: "SK-002/2025",
-    judulSK: "Penetapan Struktur Organisasi LP2M",
-    tanggalSK: "2026-03-15",
-    pejabatPenetap: "Rektor UNM",
-    file: "sk_002.pdf",
-  },
-  {
-    id: 3,
-    nomorSK: "SK-003/2025",
-    judulSK: "Penunjukan Koordinator Penelitian",
-    tanggalSK: "2026-01-20",
-    pejabatPenetap: "Dekan Fakultas",
-    file: "sk_003.pdf",
-  },
-];
-
-function formatTanggal(dateStr) {
-  const bulan = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "Mei",
-    "Jun",
-    "Jul",
-    "Ags",
-    "Sep",
-    "Okt",
-    "Nov",
-    "Des",
-  ];
-  const [y, m, d] = dateStr.split("-");
-  return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
-}
 
 // ─── Topbar ───────────────────────────────────────────────────
 function Topbar({ isAdmin, adminUser }) {
@@ -225,15 +180,16 @@ function Topbar({ isAdmin, adminUser }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────
-function SK() {
-  const [query, setQuery] = useState("");
+function UploadArsip() {
+  const [jenis, setJenis] = useState("");
+  const navigate = useNavigate();
 
-  const filtered = dataSK.filter(
-    (r) =>
-      r.nomorSK.toLowerCase().includes(query.toLowerCase()) ||
-      r.judulSK.toLowerCase().includes(query.toLowerCase()) ||
-      r.pejabatPenetap.toLowerCase().includes(query.toLowerCase()),
-  );
+  const handleLanjut = () => {
+    if (jenis === "kontrak") navigate("/upload-arsip/kontrak-tambah");
+    else if (jenis === "sk") navigate("/upload-arsip/sk-tambah");
+    else if (jenis === "surat-tugas")
+      navigate("/upload-arsip/surat-tugas-tambah");
+  };
 
   return (
     <div style={s.wrap}>
@@ -241,100 +197,35 @@ function SK() {
 
       <div style={s.card}>
         <div style={s.cardHead}>
-          <span style={s.cardTitle}>Arsip SK</span>
-          <span style={s.cntBadge}>{filtered.length} SK</span>
-          <div style={{ flex: 1 }} />
+          <span style={s.cardTitle}>Upload Arsip</span>
         </div>
 
         <div style={s.cardBody}>
-          <div style={{ marginBottom: 16 }}>
-            <input
-              type="text"
-              placeholder="Cari nomor atau judul SK..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              style={s.searchInput}
-            />
+          <div style={s.fieldGroup}>
+            <label style={s.label}>Pilih Jenis Arsip</label>
+            <select
+              value={jenis}
+              onChange={(e) => setJenis(e.target.value)}
+              style={s.select}
+            >
+              <option value="">-- Pilih Arsip --</option>
+              <option value="kontrak">Kontrak</option>
+              <option value="sk">SK</option>
+              <option value="surat-tugas">Surat Tugas</option>
+            </select>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  <th style={{ ...s.th, width: 36 }}>No</th>
-                  <th style={{ ...s.th, width: 130 }}>Nomor SK</th>
-                  <th style={s.th}>Judul SK</th>
-                  <th style={{ ...s.th, width: 110 }}>Tgl. SK</th>
-                  <th style={{ ...s.th, width: 150 }}>Pejabat Penetap</th>
-                  <th style={{ ...s.th, width: 95 }}>File PDF</th>
-                  <th style={{ ...s.th, width: 140 }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={s.empty}>
-                      Tidak ada data ditemukan
-                    </td>
-                  </tr>
-                ) : (
-                  filtered.map((item, index) => (
-                    <tr key={item.id}>
-                      <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                        {index + 1}
-                      </td>
-                      <td style={s.td}>
-                        <span style={s.nomorBadge}>{item.nomorSK}</span>
-                      </td>
-                      <td style={{ ...s.td, fontSize: 12.5 }}>
-                        {item.judulSK}
-                      </td>
-                      <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                        {formatTanggal(item.tanggalSK)}
-                      </td>
-                      <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>
-                        {item.pejabatPenetap}
-                      </td>
-                      <td style={s.td}>
-                        <button
-                          style={s.btnPdf}
-                          onClick={() => window.open(item.file, "_blank")}
-                        >
-                          Lihat PDF
-                        </button>
-                      </td>
-                      <td style={s.td}>
-                        <button
-                          style={s.btnEdit}
-                          onClick={() => console.log("Edit:", item.id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          style={s.btnDelete}
-                          onClick={() => console.log("Delete:", item.id)}
-                        >
-                          Hapus
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div
+          <button
             style={{
-              marginTop: 16,
-              display: "flex",
-              justifyContent: "flex-end",
+              ...s.btnLanjut,
+              opacity: !jenis ? 0.5 : 1,
+              cursor: !jenis ? "not-allowed" : "pointer",
             }}
+            onClick={handleLanjut}
+            disabled={!jenis}
           >
-            <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {filtered.length} dari {dataSK.length} SK
-            </span>
-          </div>
+            Lanjut
+          </button>
         </div>
       </div>
     </div>
@@ -470,28 +361,19 @@ const s = {
     gap: 10,
   },
   cardTitle: { color: "#fff", fontSize: 15, fontWeight: 600 },
-  cntBadge: {
-    background: "rgba(255,255,255,0.15)",
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: 600,
-    padding: "2px 10px",
-    borderRadius: 20,
-  },
-  btnTambah: {
-    background: "#4A9FD5",
-    color: "#fff",
-    border: "none",
-    borderRadius: 7,
-    padding: "6px 14px",
+  cardBody: { padding: "24px 22px" },
+  fieldGroup: { marginBottom: 20 },
+  label: {
+    display: "block",
     fontSize: 12.5,
     fontWeight: 600,
-    cursor: "pointer",
+    color: "#1A3A5C",
+    marginBottom: 7,
+    letterSpacing: 0.2,
   },
-  cardBody: { padding: "18px 22px" },
-  searchInput: {
+  select: {
     width: "100%",
-    padding: "8px 12px",
+    padding: "9px 12px",
     border: "0.5px solid #ccc",
     borderRadius: 8,
     fontSize: 13,
@@ -499,68 +381,18 @@ const s = {
     backgroundColor: "#F5F7FA",
     color: "#1A1A1A",
     boxSizing: "border-box",
+    appearance: "auto",
   },
-  table: { width: "100%", borderCollapse: "collapse", fontSize: 12.5 },
-  th: {
-    padding: "9px 12px",
-    fontSize: 10.5,
-    fontWeight: 600,
-    color: "#1A3A5C",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    borderBottom: "1.5px solid rgba(26,58,92,0.1)",
-    textAlign: "left",
-    whiteSpace: "nowrap",
-  },
-  td: {
-    padding: "12px 12px",
-    borderBottom: "0.5px solid #f0f0f0",
-    verticalAlign: "middle",
-    color: "#1A1A1A",
-  },
-  nomorBadge: {
-    background: "#E6F1FB",
-    color: "#0C447C",
-    fontSize: 11.5,
-    fontWeight: 600,
-    padding: "2px 9px",
-    borderRadius: 20,
-    display: "inline-block",
-    whiteSpace: "nowrap",
-  },
-  btnPdf: {
-    background: "#4A9FD5",
+  btnLanjut: {
+    background: "#1A3A5C",
     color: "#fff",
     border: "none",
-    borderRadius: 5,
-    padding: "4px 10px",
-    fontSize: 11.5,
+    borderRadius: 8,
+    padding: "9px 24px",
+    fontSize: 13,
     fontWeight: 600,
-    cursor: "pointer",
-    whiteSpace: "nowrap",
+    transition: "opacity .15s",
   },
-  btnEdit: {
-    background: "#FFF3CD",
-    color: "#633806",
-    border: "none",
-    borderRadius: 5,
-    padding: "4px 9px",
-    fontSize: 11.5,
-    fontWeight: 600,
-    cursor: "pointer",
-    marginRight: 5,
-  },
-  btnDelete: {
-    background: "#FCEBEB",
-    color: "#791F1F",
-    border: "none",
-    borderRadius: 5,
-    padding: "4px 9px",
-    fontSize: 11.5,
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-  empty: { textAlign: "center", padding: 36, color: "#888", fontSize: 13 },
 };
 
-export default SK;
+export default UploadArsip;

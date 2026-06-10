@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const isAdmin = true;
 
@@ -7,52 +8,6 @@ const adminUser = {
   inisial: "HA",
   email: "hendra@lp2m.unm.ac.id",
 };
-
-const dataSK = [
-  {
-    id: 1,
-    nomorSK: "SK-001/2025",
-    judulSK: "Pengangkatan Tim Arsip",
-    tanggalSK: "2026-06-07",
-    pejabatPenetap: "Kepala Dinas",
-    file: "sk_001.pdf",
-  },
-  {
-    id: 2,
-    nomorSK: "SK-002/2025",
-    judulSK: "Penetapan Struktur Organisasi LP2M",
-    tanggalSK: "2026-03-15",
-    pejabatPenetap: "Rektor UNM",
-    file: "sk_002.pdf",
-  },
-  {
-    id: 3,
-    nomorSK: "SK-003/2025",
-    judulSK: "Penunjukan Koordinator Penelitian",
-    tanggalSK: "2026-01-20",
-    pejabatPenetap: "Dekan Fakultas",
-    file: "sk_003.pdf",
-  },
-];
-
-function formatTanggal(dateStr) {
-  const bulan = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "Mei",
-    "Jun",
-    "Jul",
-    "Ags",
-    "Sep",
-    "Okt",
-    "Nov",
-    "Des",
-  ];
-  const [y, m, d] = dateStr.split("-");
-  return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
-}
 
 // ─── Topbar ───────────────────────────────────────────────────
 function Topbar({ isAdmin, adminUser }) {
@@ -92,9 +47,7 @@ function Topbar({ isAdmin, adminUser }) {
         <div style={s.brandName}>SIPAS</div>
         <div style={s.brandSub}>LP2M Universitas Negeri Makassar</div>
       </div>
-
       <div style={{ flex: 1 }} />
-
       {isAdmin && (
         <>
           <div style={s.notifBtn} title="Notifikasi">
@@ -110,9 +63,7 @@ function Topbar({ isAdmin, adminUser }) {
             </svg>
             <span style={s.notifDot} />
           </div>
-
           <div style={s.divider} />
-
           <div style={{ position: "relative" }} ref={ddRef}>
             <div style={s.userInfo} onClick={() => setDdOpen(!ddOpen)}>
               <div style={s.avatar}>{adminUser.inisial}</div>
@@ -135,7 +86,6 @@ function Topbar({ isAdmin, adminUser }) {
                 <path d="M6 9l6 6 6-6" />
               </svg>
             </div>
-
             {ddOpen && (
               <div style={s.dropdown}>
                 <div style={s.ddHeader}>
@@ -224,117 +174,188 @@ function Topbar({ isAdmin, adminUser }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────
-function SK() {
-  const [query, setQuery] = useState("");
-
-  const filtered = dataSK.filter(
-    (r) =>
-      r.nomorSK.toLowerCase().includes(query.toLowerCase()) ||
-      r.judulSK.toLowerCase().includes(query.toLowerCase()) ||
-      r.pejabatPenetap.toLowerCase().includes(query.toLowerCase()),
+// ─── Field Components ─────────────────────────────────────────
+function Field({ label, children, half }) {
+  return (
+    <div style={{ ...s.fieldWrap, width: half ? "calc(50% - 8px)" : "100%" }}>
+      <label style={s.label}>{label}</label>
+      {children}
+    </div>
   );
+}
+
+// ─── Main Component ───────────────────────────────────────────
+function KontrakTambah() {
+  const [fileName, setFileName] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil",
+      text: "Data Kontrak berhasil disimpan!",
+      confirmButtonColor: "#1A3A5C",
+    });
+  };
 
   return (
     <div style={s.wrap}>
       <Topbar isAdmin={isAdmin} adminUser={adminUser} />
 
       <div style={s.card}>
+        {/* Header */}
         <div style={s.cardHead}>
-          <span style={s.cardTitle}>Arsip SK</span>
-          <span style={s.cntBadge}>{filtered.length} SK</span>
-          <div style={{ flex: 1 }} />
+          <div style={s.headIcon}>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#4A9FD5"
+              strokeWidth="1.8"
+            >
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </div>
+          <div>
+            <div style={s.cardTitle}>Tambah Arsip Kontrak</div>
+            <div style={s.cardSub}>
+              Lengkapi semua informasi kontrak di bawah ini
+            </div>
+          </div>
         </div>
 
+        {/* Body */}
         <div style={s.cardBody}>
-          <div style={{ marginBottom: 16 }}>
-            <input
-              type="text"
-              placeholder="Cari nomor atau judul SK..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              style={s.searchInput}
-            />
-          </div>
+          <form onSubmit={handleSubmit}>
+            {/* Section: Identitas Kontrak */}
+            <div style={s.sectionLabel}>Identitas Kontrak</div>
+            <div style={s.row}>
+              <Field label="Nomor Kontrak *" half>
+                <input
+                  type="text"
+                  style={s.input}
+                  placeholder="Contoh: KTR-001/2025"
+                  required
+                />
+              </Field>
+              <Field label="Judul Kontrak *" half>
+                <input
+                  type="text"
+                  style={s.input}
+                  placeholder="Masukkan judul kontrak"
+                  required
+                />
+              </Field>
+            </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  <th style={{ ...s.th, width: 36 }}>No</th>
-                  <th style={{ ...s.th, width: 130 }}>Nomor SK</th>
-                  <th style={s.th}>Judul SK</th>
-                  <th style={{ ...s.th, width: 110 }}>Tgl. SK</th>
-                  <th style={{ ...s.th, width: 150 }}>Pejabat Penetap</th>
-                  <th style={{ ...s.th, width: 95 }}>File PDF</th>
-                  <th style={{ ...s.th, width: 140 }}>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={s.empty}>
-                      Tidak ada data ditemukan
-                    </td>
-                  </tr>
+            {/* Section: Para Pihak */}
+            <div style={s.sectionLabel}>Para Pihak</div>
+            <div style={s.row}>
+              <Field label="Pihak Pertama" half>
+                <input
+                  type="text"
+                  style={s.input}
+                  placeholder="Nama instansi / lembaga pihak pertama"
+                />
+              </Field>
+              <Field label="Pihak Kedua" half>
+                <input
+                  type="text"
+                  style={s.input}
+                  placeholder="Nama instansi / lembaga pihak kedua"
+                />
+              </Field>
+            </div>
+
+            {/* Section: Periode */}
+            <div style={s.sectionLabel}>Periode Kontrak</div>
+            <div style={s.row}>
+              <Field label="Tanggal Kontrak" half>
+                <input type="date" style={s.input} />
+              </Field>
+              <Field label="Tanggal Berakhir" half>
+                <input type="date" style={s.input} />
+              </Field>
+            </div>
+
+            {/* Section: Upload */}
+            <div style={s.sectionLabel}>Dokumen</div>
+            <Field label="Upload File PDF *">
+              <label style={s.uploadBox}>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  required
+                  style={{ display: "none" }}
+                  onChange={(e) => setFileName(e.target.files[0]?.name || "")}
+                />
+                <div style={s.uploadIcon}>
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4A9FD5"
+                    strokeWidth="1.6"
+                  >
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                </div>
+                {fileName ? (
+                  <span
+                    style={{ fontSize: 13, color: "#1A3A5C", fontWeight: 600 }}
+                  >
+                    {fileName}
+                  </span>
                 ) : (
-                  filtered.map((item, index) => (
-                    <tr key={item.id}>
-                      <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                        {index + 1}
-                      </td>
-                      <td style={s.td}>
-                        <span style={s.nomorBadge}>{item.nomorSK}</span>
-                      </td>
-                      <td style={{ ...s.td, fontSize: 12.5 }}>
-                        {item.judulSK}
-                      </td>
-                      <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                        {formatTanggal(item.tanggalSK)}
-                      </td>
-                      <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>
-                        {item.pejabatPenetap}
-                      </td>
-                      <td style={s.td}>
-                        <button
-                          style={s.btnPdf}
-                          onClick={() => window.open(item.file, "_blank")}
-                        >
-                          Lihat PDF
-                        </button>
-                      </td>
-                      <td style={s.td}>
-                        <button
-                          style={s.btnEdit}
-                          onClick={() => console.log("Edit:", item.id)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          style={s.btnDelete}
-                          onClick={() => console.log("Delete:", item.id)}
-                        >
-                          Hapus
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                  <>
+                    <span style={{ fontSize: 13, color: "#555" }}>
+                      Klik untuk memilih file PDF
+                    </span>
+                    <span
+                      style={{ fontSize: 11.5, color: "#aaa", marginTop: 2 }}
+                    >
+                      Hanya file .pdf yang diterima
+                    </span>
+                  </>
                 )}
-              </tbody>
-            </table>
-          </div>
+              </label>
+            </Field>
 
-          <div
-            style={{
-              marginTop: 16,
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {filtered.length} dari {dataSK.length} SK
-            </span>
-          </div>
+            <div style={s.sep} />
+
+            {/* Actions */}
+            <div
+              style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}
+            >
+              <button type="button" style={s.btnBatal}>
+                Batal
+              </button>
+              <button type="submit" style={s.btnSimpan}>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  style={{ marginRight: 6 }}
+                >
+                  <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Simpan Arsip
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -456,6 +477,8 @@ const s = {
     background: "transparent",
   },
   ddSep: { height: 0.5, backgroundColor: "#eee" },
+
+  // Card
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -464,103 +487,111 @@ const s = {
   },
   cardHead: {
     backgroundColor: "#1A3A5C",
-    padding: "16px 22px",
+    padding: "18px 24px",
     display: "flex",
     alignItems: "center",
-    gap: 10,
+    gap: 14,
   },
-  cardTitle: { color: "#fff", fontSize: 15, fontWeight: 600 },
-  cntBadge: {
-    background: "rgba(255,255,255,0.15)",
-    color: "#fff",
+  headIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  cardTitle: { color: "#fff", fontSize: 15, fontWeight: 600, lineHeight: 1.3 },
+  cardSub: { color: "rgba(255,255,255,0.55)", fontSize: 11.5, marginTop: 2 },
+  cardBody: { padding: "26px 28px" },
+
+  // Section label
+  sectionLabel: {
     fontSize: 11,
-    fontWeight: 600,
-    padding: "2px 10px",
-    borderRadius: 20,
+    fontWeight: 700,
+    color: "#4A9FD5",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 12,
+    marginTop: 6,
+    paddingBottom: 6,
+    borderBottom: "1px solid #EAF3FB",
   },
-  btnTambah: {
-    background: "#4A9FD5",
-    color: "#fff",
-    border: "none",
-    borderRadius: 7,
-    padding: "6px 14px",
-    fontSize: 12.5,
+
+  // Form
+  row: { display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 18 },
+  fieldWrap: { display: "flex", flexDirection: "column" },
+  label: {
+    fontSize: 12,
     fontWeight: 600,
-    cursor: "pointer",
+    color: "#374151",
+    marginBottom: 6,
+    letterSpacing: 0.2,
   },
-  cardBody: { padding: "18px 22px" },
-  searchInput: {
-    width: "100%",
-    padding: "8px 12px",
-    border: "0.5px solid #ccc",
+  input: {
+    padding: "9px 12px",
+    border: "0.5px solid #D1D5DB",
     borderRadius: 8,
     fontSize: 13,
     outline: "none",
-    backgroundColor: "#F5F7FA",
+    backgroundColor: "#FAFAFA",
     color: "#1A1A1A",
+    width: "100%",
     boxSizing: "border-box",
+    transition: "border .15s",
   },
-  table: { width: "100%", borderCollapse: "collapse", fontSize: 12.5 },
-  th: {
-    padding: "9px 12px",
-    fontSize: 10.5,
+
+  // Upload
+  uploadBox: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    padding: "28px 20px",
+    border: "1.5px dashed #B8D4EE",
+    borderRadius: 10,
+    backgroundColor: "#F0F7FD",
+    cursor: "pointer",
+    transition: "background .15s",
+  },
+  uploadIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 12,
+    backgroundColor: "#E6F1FB",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4,
+  },
+
+  sep: { height: 1, backgroundColor: "#F0F0F0", margin: "22px 0" },
+
+  // Buttons
+  btnBatal: {
+    background: "#F3F4F6",
+    color: "#374151",
+    border: "none",
+    borderRadius: 8,
+    padding: "9px 20px",
+    fontSize: 13,
     fontWeight: 600,
-    color: "#1A3A5C",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    borderBottom: "1.5px solid rgba(26,58,92,0.1)",
-    textAlign: "left",
-    whiteSpace: "nowrap",
+    cursor: "pointer",
   },
-  td: {
-    padding: "12px 12px",
-    borderBottom: "0.5px solid #f0f0f0",
-    verticalAlign: "middle",
-    color: "#1A1A1A",
-  },
-  nomorBadge: {
-    background: "#E6F1FB",
-    color: "#0C447C",
-    fontSize: 11.5,
-    fontWeight: 600,
-    padding: "2px 9px",
-    borderRadius: 20,
-    display: "inline-block",
-    whiteSpace: "nowrap",
-  },
-  btnPdf: {
-    background: "#4A9FD5",
+  btnSimpan: {
+    background: "#1A3A5C",
     color: "#fff",
     border: "none",
-    borderRadius: 5,
-    padding: "4px 10px",
-    fontSize: 11.5,
+    borderRadius: 8,
+    padding: "9px 22px",
+    fontSize: 13,
     fontWeight: 600,
     cursor: "pointer",
-    whiteSpace: "nowrap",
+    display: "flex",
+    alignItems: "center",
   },
-  btnEdit: {
-    background: "#FFF3CD",
-    color: "#633806",
-    border: "none",
-    borderRadius: 5,
-    padding: "4px 9px",
-    fontSize: 11.5,
-    fontWeight: 600,
-    cursor: "pointer",
-    marginRight: 5,
-  },
-  btnDelete: {
-    background: "#FCEBEB",
-    color: "#791F1F",
-    border: "none",
-    borderRadius: 5,
-    padding: "4px 9px",
-    fontSize: 11.5,
-    fontWeight: 600,
-    cursor: "pointer",
-  },
-  empty: { textAlign: "center", padding: 36, color: "#888", fontSize: 13 },
 };
 
-export default SK;
+export default KontrakTambah;
