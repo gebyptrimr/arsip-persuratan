@@ -1,185 +1,68 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const isAdmin = true;
+const jenisArsip = [
+  {
+    value: "kontrak",
+    label: "Kontrak",
+    desc: "Arsip perjanjian kerja sama antar pihak",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+      </svg>
+    ),
+  },
+  {
+    value: "sk",
+    label: "SK",
+    desc: "Surat Keputusan dari pejabat berwenang",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+      </svg>
+    ),
+  },
+  {
+    value: "surat-tugas",
+    label: "Surat Tugas",
+    desc: "Penugasan resmi kepada staf atau pegawai",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+        <line x1="8" y1="14" x2="16" y2="14" />
+      </svg>
+    ),
+  },
+];
 
-const adminUser = {
-  nama: "Hendra Arifin",
-  inisial: "HA",
-  email: "hendra@lp2m.unm.ac.id",
-};
-
-// ─── Topbar ───────────────────────────────────────────────────
-function Topbar({ isAdmin, adminUser }) {
-  const [ddOpen, setDdOpen] = useState(false);
-  const ddRef = useRef(null);
-
-  useEffect(() => {
-    function handleClick(e) {
-      if (ddRef.current && !ddRef.current.contains(e.target)) setDdOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  return (
-    <div style={s.topbar}>
-      <div style={s.logo}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <rect
-            x="3"
-            y="5"
-            width="18"
-            height="14"
-            rx="2"
-            stroke="#4A9FD5"
-            strokeWidth="1.8"
-          />
-          <path
-            d="M3 9l9 6 9-6"
-            stroke="#4A9FD5"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-      <div>
-        <div style={s.brandName}>SIPAS</div>
-        <div style={s.brandSub}>LP2M Universitas Negeri Makassar</div>
-      </div>
-
-      <div style={{ flex: 1 }} />
-
-      {isAdmin && (
-        <>
-          <div style={s.notifBtn} title="Notifikasi">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-            >
-              <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V4a1 1 0 10-2 0v1.083A6 6 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <span style={s.notifDot} />
-          </div>
-
-          <div style={s.divider} />
-
-          <div style={{ position: "relative" }} ref={ddRef}>
-            <div style={s.userInfo} onClick={() => setDdOpen(!ddOpen)}>
-              <div style={s.avatar}>{adminUser.inisial}</div>
-              <div>
-                <div style={s.uname}>{adminUser.nama}</div>
-                <div style={s.urole}>Administrator</div>
-              </div>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#aaa"
-                strokeWidth="2"
-                style={{
-                  transition: "transform .2s",
-                  transform: ddOpen ? "rotate(180deg)" : "rotate(0deg)",
-                }}
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </div>
-
-            {ddOpen && (
-              <div style={s.dropdown}>
-                <div style={s.ddHeader}>
-                  <div
-                    style={{ ...s.avatar, width: 38, height: 38, fontSize: 14 }}
-                  >
-                    {adminUser.inisial}
-                  </div>
-                  <div>
-                    <div style={s.ddName}>{adminUser.nama}</div>
-                    <div style={s.ddEmail}>{adminUser.email}</div>
-                  </div>
-                </div>
-                <div
-                  style={s.ddItem}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "#f5f5f5")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "transparent")
-                  }
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#888"
-                    strokeWidth="1.8"
-                  >
-                    <circle cx="12" cy="8" r="4" />
-                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                  </svg>
-                  Profil Saya
-                </div>
-                <div
-                  style={s.ddItem}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "#f5f5f5")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "transparent")
-                  }
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#888"
-                    strokeWidth="1.8"
-                  >
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-                  </svg>
-                  Pengaturan
-                </div>
-                <div style={s.ddSep} />
-                <div
-                  style={{ ...s.ddItem, color: "#A32D2D" }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "#fff5f5")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "transparent")
-                  }
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#A32D2D"
-                    strokeWidth="1.8"
-                  >
-                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-                  </svg>
-                  Keluar
-                </div>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-// ─── Main Component ───────────────────────────────────────────
 function UploadArsip() {
   const [jenis, setJenis] = useState("");
   const navigate = useNavigate();
@@ -193,39 +76,120 @@ function UploadArsip() {
 
   return (
     <div style={s.wrap}>
-      <Topbar isAdmin={isAdmin} adminUser={adminUser} />
-
       <div style={s.card}>
+        {/* ── Header ── */}
         <div style={s.cardHead}>
-          <span style={s.cardTitle}>Upload Arsip</span>
+          <div style={s.decCircle1} />
+          <div style={s.decCircle2} />
+          <div style={s.headIcon}>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#4A9FD5"
+              strokeWidth="1.8"
+            >
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={s.cardTitle}>Upload Arsip</div>
+            <div style={s.cardSub}>
+              Pilih jenis arsip yang ingin ditambahkan
+            </div>
+          </div>
         </div>
 
+        {/* ── Body ── */}
         <div style={s.cardBody}>
-          <div style={s.fieldGroup}>
-            <label style={s.label}>Pilih Jenis Arsip</label>
-            <select
-              value={jenis}
-              onChange={(e) => setJenis(e.target.value)}
-              style={s.select}
-            >
-              <option value="">-- Pilih Arsip --</option>
-              <option value="kontrak">Kontrak</option>
-              <option value="sk">SK</option>
-              <option value="surat-tugas">Surat Tugas</option>
-            </select>
+          {/* Section label */}
+          <div style={s.sectionHead}>
+            <div style={s.sectionDot} />
+            <span style={s.sectionLabel}>Pilih Jenis Arsip</span>
           </div>
 
-          <button
-            style={{
-              ...s.btnLanjut,
-              opacity: !jenis ? 0.5 : 1,
-              cursor: !jenis ? "not-allowed" : "pointer",
-            }}
-            onClick={handleLanjut}
-            disabled={!jenis}
-          >
-            Lanjut
-          </button>
+          {/* Card picker */}
+          <div style={s.pickerGrid}>
+            {jenisArsip.map((item) => {
+              const selected = jenis === item.value;
+              return (
+                <div
+                  key={item.value}
+                  onClick={() => setJenis(item.value)}
+                  style={{
+                    ...s.pickerCard,
+                    border: selected
+                      ? "1.5px solid #1A3A5C"
+                      : "1.5px solid #E5E7EB",
+                    backgroundColor: selected ? "#F0F6FC" : "#FAFAFA",
+                    boxShadow: selected
+                      ? "0 0 0 3px rgba(26,58,92,0.08)"
+                      : "none",
+                  }}
+                >
+                  <div
+                    style={{
+                      ...s.pickerIcon,
+                      backgroundColor: selected ? "#1A3A5C" : "#F0F4F8",
+                      color: selected ? "#fff" : "#6B7280",
+                    }}
+                  >
+                    {item.icon}
+                  </div>
+                  <div style={s.pickerInfo}>
+                    <div
+                      style={{
+                        ...s.pickerLabel,
+                        color: selected ? "#1A3A5C" : "#111827",
+                      }}
+                    >
+                      {item.label}
+                    </div>
+                    <div style={s.pickerDesc}>{item.desc}</div>
+                  </div>
+                  {/* Radio dot */}
+                  <div
+                    style={{
+                      ...s.radioDot,
+                      border: selected
+                        ? "5px solid #1A3A5C"
+                        : "1.5px solid #D1D5DB",
+                      backgroundColor: selected ? "#fff" : "transparent",
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Action */}
+          <div style={s.actionBar}>
+            <button
+              onClick={handleLanjut}
+              disabled={!jenis}
+              style={{
+                ...s.btnLanjut,
+                opacity: !jenis ? 0.45 : 1,
+                cursor: !jenis ? "not-allowed" : "pointer",
+              }}
+            >
+              <span>Lanjut</span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                style={{ marginLeft: 8 }}
+              >
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -240,113 +204,6 @@ const s = {
     padding: "24px",
     fontFamily: "'Inter', sans-serif",
   },
-  topbar: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 20,
-    backgroundColor: "#fff",
-    border: "0.5px solid #e0e0e0",
-    borderRadius: 12,
-    padding: "10px 18px",
-  },
-  logo: {
-    width: 34,
-    height: 34,
-    backgroundColor: "#1A3A5C",
-    borderRadius: 8,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  brandName: {
-    fontSize: 17,
-    fontWeight: 600,
-    color: "#1A3A5C",
-    lineHeight: 1.2,
-  },
-  brandSub: { fontSize: 11.5, color: "#888" },
-  notifBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    border: "0.5px solid #ddd",
-    backgroundColor: "#F5F7FA",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    position: "relative",
-    color: "#666",
-  },
-  notifDot: {
-    width: 8,
-    height: 8,
-    backgroundColor: "#E24B4A",
-    borderRadius: "50%",
-    position: "absolute",
-    top: 6,
-    right: 6,
-    border: "1.5px solid #fff",
-  },
-  divider: { width: 1, height: 28, backgroundColor: "#e0e0e0" },
-  userInfo: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    cursor: "pointer",
-    padding: "4px 10px",
-    borderRadius: 8,
-    transition: "background .15s",
-  },
-  avatar: {
-    width: 34,
-    height: 34,
-    borderRadius: "50%",
-    backgroundColor: "#1A3A5C",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#B5D4F4",
-    flexShrink: 0,
-  },
-  uname: { fontSize: 13, fontWeight: 600, color: "#1A1A1A", lineHeight: 1.2 },
-  urole: { fontSize: 11, color: "#888" },
-  dropdown: {
-    position: "absolute",
-    top: "calc(100% + 8px)",
-    right: 0,
-    backgroundColor: "#fff",
-    border: "0.5px solid #ddd",
-    borderRadius: 10,
-    overflow: "hidden",
-    width: 210,
-    zIndex: 100,
-  },
-  ddHeader: {
-    padding: "12px 14px",
-    borderBottom: "0.5px solid #eee",
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-  },
-  ddName: { fontSize: 13, fontWeight: 600, color: "#1A1A1A" },
-  ddEmail: { fontSize: 11, color: "#888" },
-  ddItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    padding: "10px 14px",
-    fontSize: 13,
-    color: "#1A1A1A",
-    cursor: "pointer",
-    transition: "background .12s",
-    background: "transparent",
-  },
-  ddSep: { height: 0.5, backgroundColor: "#eee" },
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -355,42 +212,140 @@ const s = {
   },
   cardHead: {
     backgroundColor: "#1A3A5C",
-    padding: "16px 22px",
+    padding: "20px 26px",
     display: "flex",
     alignItems: "center",
-    gap: 10,
+    gap: 14,
+    position: "relative",
+    overflow: "hidden",
   },
-  cardTitle: { color: "#fff", fontSize: 15, fontWeight: 600 },
-  cardBody: { padding: "24px 22px" },
-  fieldGroup: { marginBottom: 20 },
-  label: {
-    display: "block",
-    fontSize: 12.5,
-    fontWeight: 600,
-    color: "#1A3A5C",
-    marginBottom: 7,
-    letterSpacing: 0.2,
+  decCircle1: {
+    position: "absolute",
+    width: 160,
+    height: 160,
+    borderRadius: "50%",
+    border: "1px solid rgba(255,255,255,0.06)",
+    top: -60,
+    right: 120,
+    pointerEvents: "none",
   },
-  select: {
-    width: "100%",
-    padding: "9px 12px",
-    border: "0.5px solid #ccc",
-    borderRadius: 8,
-    fontSize: 13,
-    outline: "none",
-    backgroundColor: "#F5F7FA",
-    color: "#1A1A1A",
-    boxSizing: "border-box",
-    appearance: "auto",
+  decCircle2: {
+    position: "absolute",
+    width: 100,
+    height: 100,
+    borderRadius: "50%",
+    backgroundColor: "rgba(74,159,213,0.08)",
+    bottom: -30,
+    right: 60,
+    pointerEvents: "none",
   },
+  headIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    position: "relative",
+    zIndex: 1,
+  },
+  cardTitle: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: 700,
+    lineHeight: 1.3,
+    position: "relative",
+    zIndex: 1,
+  },
+  cardSub: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 11,
+    marginTop: 3,
+    position: "relative",
+    zIndex: 1,
+  },
+  cardBody: { padding: "28px 28px 26px" },
+
+  sectionHead: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 16,
+  },
+  sectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    backgroundColor: "#4A9FD5",
+    flexShrink: 0,
+  },
+  sectionLabel: {
+    fontSize: 10.5,
+    fontWeight: 700,
+    color: "#4A9FD5",
+    textTransform: "uppercase",
+    letterSpacing: 1.2,
+    paddingBottom: 6,
+    borderBottom: "1.5px solid #EAF3FB",
+    flex: 1,
+  },
+
+  pickerGrid: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    marginBottom: 28,
+  },
+  pickerCard: {
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+    padding: "16px 18px",
+    borderRadius: 10,
+    cursor: "pointer",
+    transition: "all .15s",
+    position: "relative",
+  },
+  pickerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    transition: "all .15s",
+  },
+  pickerInfo: { flex: 1 },
+  pickerLabel: {
+    fontSize: 14,
+    fontWeight: 700,
+    marginBottom: 3,
+    transition: "color .15s",
+  },
+  pickerDesc: { fontSize: 12, color: "#9CA3AF" },
+  radioDot: {
+    width: 18,
+    height: 18,
+    borderRadius: "50%",
+    flexShrink: 0,
+    transition: "all .15s",
+  },
+
+  actionBar: { display: "flex", justifyContent: "flex-end" },
   btnLanjut: {
+    display: "flex",
+    alignItems: "center",
     background: "#1A3A5C",
     color: "#fff",
     border: "none",
-    borderRadius: 8,
-    padding: "9px 24px",
+    borderRadius: 9,
+    padding: "10px 24px",
     fontSize: 13,
-    fontWeight: 600,
+    fontWeight: 700,
     transition: "opacity .15s",
   },
 };
