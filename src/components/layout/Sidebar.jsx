@@ -226,7 +226,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           }}
         >
           <i
-            className="ti ti-settings"
+            className="ti ti-logout"
             style={{
               fontSize: "20px",
             }}
@@ -239,7 +239,7 @@ export default function Sidebar({ collapsed, onToggle }) {
                 fontFamily: "DM Sans",
               }}
             >
-              Pengaturan
+              Keluar
             </span>
           )}
         </NavLink>
