@@ -1,9 +1,13 @@
 import "./Dashboard.css";
+import { useNavigate } from "react-router-dom";
 import StatCards from "./StatCards";
 import DashboardCharts from "./DashboardCharts";
 import RetentionChart from "./RetentionChart";
+import RecentArchives from "./RecentArchives";
+import AttentionPanel from "./AttentionPanel";
 
 function Dashboard() {
+  const navigate = useNavigate();
   return (
     <div className="dashboard-page">
       <div className="dashboard">
@@ -25,7 +29,7 @@ function Dashboard() {
               Periode: Juni   2026
             </button>
 
-            <button className="btn-primary">
+            <button className="btn-primary" onClick={() => navigate("/upload-arsip")}>
               <i className="ti ti-plus"></i>
               Tambah Arsip
             </button>
@@ -36,6 +40,8 @@ function Dashboard() {
         <div className="dashboard-overview">
             <DashboardCharts />
           <RetentionChart />
+          <RecentArchives />
+          <AttentionPanel />
         </div>
       
       </div>
