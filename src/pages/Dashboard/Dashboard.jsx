@@ -1,5 +1,5 @@
-import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
+import "./Dashboard.css";
 import StatCards from "./StatCards";
 import DashboardCharts from "./DashboardCharts";
 import RetentionChart from "./RetentionChart";
@@ -8,10 +8,10 @@ import AttentionPanel from "./AttentionPanel";
 
 function Dashboard() {
   const navigate = useNavigate();
+
   return (
     <div className="dashboard-page">
       <div className="dashboard">
-
         <div className="dashboard-header">
           <div className="dashboard-title">
             <h1>Dashboard</h1>
@@ -26,10 +26,13 @@ function Dashboard() {
           <div className="dashboard-actions">
             <button className="btn-outline">
               <i className="ti ti-calendar-event"></i>
-              Periode: Juni   2026
+              Periode: Juni 2026
             </button>
 
-            <button className="btn-primary" onClick={() => navigate("/upload-arsip")}>
+            <button
+              className="btn-primary"
+              onClick={() => navigate("/upload-arsip")}
+            >
               <i className="ti ti-plus"></i>
               Tambah Arsip
             </button>
@@ -37,13 +40,13 @@ function Dashboard() {
         </div>
 
         <StatCards />
+
         <div className="dashboard-overview">
-            <DashboardCharts />
+          <DashboardCharts />
           <RetentionChart />
           <RecentArchives />
           <AttentionPanel />
         </div>
-      
       </div>
     </div>
   );
