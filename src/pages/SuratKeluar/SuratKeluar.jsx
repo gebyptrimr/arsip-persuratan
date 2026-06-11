@@ -1,73 +1,74 @@
+import React from "react";
 
-  function SuratKeluar() {
-  const user = JSON.parse(localStorage.getItem("user")) || {
-    role: "admin",
-  };
+// Sambung dari context/session auth
+const isAdmin = true;
 
-  const data = [
-    {
-      id: 1,
-      nomorSurat: "001/SK/2025",
-      tanggalSurat: "2025-06-01",
-      tujuan: "BKD",
-      perihal: "Undangan Rapat",
-      file: "surat.pdf",
-    },
-  ];
+const dataSurat = [
+  { id:1, nomorSurat:"001/SK/2025", tanggalSurat:"2025-06-01", tujuan:"BKD", perihal:"Undangan Rapat Koordinasi", file:"surat_keluar_001.pdf" },
+  { id:2, nomorSurat:"002/SK/2025", tanggalSurat:"2025-06-04", tujuan:"Kemendikbud", perihal:"Laporan Kegiatan Penelitian", file:"surat_keluar_002.pdf" },
+  { id:3, nomorSurat:"003/SK/2025", tanggalSurat:"2025-06-06", tujuan:"Rektor UNM", perihal:"Permohonan Dana Hibah", file:"surat_keluar_003.pdf" },
+];
 
+function formatTanggal(dateStr) {
+  const bulan = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
+  const [y, m, d] = dateStr.split("-");
+  return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
+}
+
+function SuratKeluar() {
   return (
-    <div className="container mt-4">
-      <div className="card shadow-sm">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h4 className="mb-0">Surat Keluar</h4>
+    <div style={s.wrap}>
+      <style>{`
+        .btn-pdf { background: #4A9FD5 !important; color: #fff !important; border: none; border-radius: 5px; padding: 4px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .btn-pdf:hover { background: #2280BE !important; }
+        .btn-pdf:active, .btn-pdf:focus { background: #4A9FD5 !important; outline: none; }
 
+        .btn-edit { background: #FFF3CD !important; color: #633806 !important; border: none; border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-right: 5px; }
+        .btn-edit:hover { background: #FAC775 !important; }
+        .btn-edit:active, .btn-edit:focus { background: #FFF3CD !important; outline: none; }
+
+        .btn-delete { background: #FCEBEB !important; color: #791F1F !important; border: none; border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+        .btn-delete:hover { background: #F7C1C1 !important; }
+        .btn-delete:active, .btn-delete:focus { background: #FCEBEB !important; outline: none; }
+
+        .tbl-row:hover { background: #F5F8FC; }
+      `}</style>
+
+      <div style={s.card}>
+        <div style={s.cardHead}>
+          <span style={s.cardTitle}>Surat Keluar</span>
+          <span style={s.cntBadge}>{dataSurat.length} surat</span>
         </div>
 
-        <div className="card-body">
-          <input
-            type="text"
-            className="form-control mb-3"
-            placeholder="Cari surat..."
-          />
-
-          <div className="table-responsive">
-            <table className="table table-bordered table-hover">
-              <thead className="table-light">
+        <div style={s.cardBody}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={s.table}>
+              <thead>
                 <tr>
-                  <th>No</th>
-                  <th>Nomor Surat</th>
-                  <th>Tanggal Surat</th>
-                  <th>Tujuan</th>
-                  <th>Perihal</th>
-                  <th>File PDF</th>
-                  {user.role === "admin" && <th>Aksi</th>}
+                  <th style={{ ...s.th, width: 36 }}>No</th>
+                  <th style={{ ...s.th, width: 120 }}>Nomor Surat</th>
+                  <th style={{ ...s.th, width: 110 }}>Tgl. Surat</th>
+                  <th style={{ ...s.th, width: 110 }}>Tujuan</th>
+                  <th style={s.th}>Perihal</th>
+                  <th style={{ ...s.th, width: 95 }}>File PDF</th>
+                  {isAdmin && <th style={{ ...s.th, width: 140 }}>Aksi</th>}
                 </tr>
               </thead>
-
               <tbody>
-                {data.map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{index + 1}</td>
-                    <td>{item.nomorSurat}</td>
-                    <td>{item.tanggalSurat}</td>
-                    <td>{item.tujuan}</td>
-                    <td>{item.perihal}</td>
-
-                    <td>
-                      <button className="btn btn-info btn-sm text-white">
-                        Lihat PDF
-                      </button>
+                {dataSurat.map((item, index) => (
+                  <tr key={item.id} className="tbl-row">
+                    <td style={{ ...s.td, color: "#888", fontSize: 12 }}>{index + 1}</td>
+                    <td style={s.td}><span style={s.nomorBadge}>{item.nomorSurat}</span></td>
+                    <td style={{ ...s.td, color: "#888", fontSize: 12 }}>{formatTanggal(item.tanggalSurat)}</td>
+                    <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>{item.tujuan}</td>
+                    <td style={{ ...s.td, fontSize: 12.5 }}>{item.perihal}</td>
+                    <td style={s.td}>
+                      <button className="btn-pdf" onClick={() => window.open(item.file, "_blank")}>Lihat PDF</button>
                     </td>
-
-                    {user.role === "admin" && (
-                      <td>
-                        <button className="btn btn-warning btn-sm me-2">
-                          Edit
-                        </button>
-
-                        <button className="btn btn-danger btn-sm">
-                          Delete
-                        </button>
+                    {isAdmin && (
+                      <td style={s.td}>
+                        <button className="btn-edit" onClick={() => console.log("Edit:", item.id)}>Edit</button>
+                        <button className="btn-delete" onClick={() => console.log("Delete:", item.id)}>Hapus</button>
                       </td>
                     )}
                   </tr>
@@ -75,10 +76,29 @@
               </tbody>
             </table>
           </div>
+
+          <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+            <span style={{ fontSize: 11.5, color: "#888" }}>
+              Menampilkan {dataSurat.length} dari {dataSurat.length} surat
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+const s = {
+  wrap: { padding: "24px", fontFamily: "'DM Sans', sans-serif" },
+  card: { backgroundColor: "#fff", borderRadius: 14, border: "0.5px solid #e0e0e0", overflow: "hidden" },
+  cardHead: { backgroundColor: "#1A3A5C", padding: "16px 22px", display: "flex", alignItems: "center", gap: 10 },
+  cardTitle: { color: "#fff", fontSize: 15, fontWeight: 600 },
+  cntBadge: { background: "rgba(255,255,255,0.15)", color: "#fff", fontSize: 11, fontWeight: 600, padding: "2px 10px", borderRadius: 20 },
+  cardBody: { padding: "18px 22px" },
+  table: { width: "100%", borderCollapse: "collapse", fontSize: 12.5 },
+  th: { padding: "9px 12px", fontSize: 10.5, fontWeight: 600, color: "#1A3A5C", textTransform: "uppercase", letterSpacing: 0.5, borderBottom: "1.5px solid rgba(26,58,92,0.1)", textAlign: "left", whiteSpace: "nowrap" },
+  td: { padding: "12px 12px", borderBottom: "0.5px solid #f0f0f0", verticalAlign: "middle", color: "#1A1A1A" },
+  nomorBadge: { background: "#E6F1FB", color: "#0C447C", fontSize: 11.5, fontWeight: 600, padding: "2px 9px", borderRadius: 20, display: "inline-block", whiteSpace: "nowrap" },
+};
 
 export default SuratKeluar;

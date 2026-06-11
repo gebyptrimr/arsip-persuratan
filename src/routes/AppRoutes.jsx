@@ -12,6 +12,7 @@ import UploadArsip from "../pages/UploadArsip/UploadArsip";
 import KontrakTambah from "../pages/UploadArsip/KontrakTambah";
 import SKTambah from "../pages/UploadArsip/SKTambah";
 import SuratTugasTambah from "../pages/UploadArsip/SuratTugasTambah";
+import RetensiArsip from "../pages/RetensiArsip/RetensiArsip";
 
 function AppRoutes() {
   return (
@@ -35,6 +36,7 @@ function AppRoutes() {
           path="/upload-arsip/surat-tugas-tambah"
           element={<SuratTugasTambah />}
         />
+        <Route path="/retensi" element={<RetensiArsip />} />
       </Route>
     </Routes>
   );

@@ -138,7 +138,7 @@ function SuratMasuk() {
 const s = {
   wrap: {
     padding: "24px",
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'DM Sans', sans-serif",
   },
   card: {
     backgroundColor: "#fff",
