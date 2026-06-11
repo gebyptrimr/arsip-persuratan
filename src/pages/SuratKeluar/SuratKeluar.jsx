@@ -1,5 +1,3 @@
-import React from "react";
-
 // Sambung dari context/session auth
 const isAdmin = true;
 
@@ -100,5 +98,6 @@ const s = {
   td: { padding: "12px 12px", borderBottom: "0.5px solid #f0f0f0", verticalAlign: "middle", color: "#1A1A1A" },
   nomorBadge: { background: "#E6F1FB", color: "#0C447C", fontSize: 11.5, fontWeight: 600, padding: "2px 9px", borderRadius: 20, display: "inline-block", whiteSpace: "nowrap" },
 };
+
 
 export default SuratKeluar;
