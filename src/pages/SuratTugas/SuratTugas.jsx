@@ -1,22 +1,5 @@
-import React, { useEffect } from "react";
-
-// ── Simulasi role aktif: ganti "admin" <-> "user" untuk test
+// Sambung dari context/session auth
 const currentRole = "admin"; // "admin" | "user"
-
-const globalStyle = `
-  button:active { outline: none !important; }
-  button:focus  { outline: none !important; }
-`;
-
-function InjectStyle() {
-  useEffect(() => {
-    const tag = document.createElement("style");
-    tag.innerHTML = globalStyle;
-    document.head.appendChild(tag);
-    return () => document.head.removeChild(tag);
-  }, []);
-  return null;
-}
 
 const dataSuratTugas = [
   {
@@ -70,26 +53,27 @@ function formatTanggal(dateStr) {
   return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
 }
 
-function Btn({ style, onClick, children }) {
-  return (
-    <span
-      role="button"
-      tabIndex={0}
-      style={{ ...style, display: "inline-block" }}
-      onClick={onClick}
-      onKeyDown={(e) => e.key === "Enter" && onClick?.()}
-    >
-      {children}
-    </span>
-  );
-}
-
 function SuratTugas() {
   const isAdmin = currentRole === "admin";
 
   return (
     <div style={s.wrap}>
-      <InjectStyle />
+      <style>{`
+        .btn-pdf { background: #4A9FD5 !important; color: #fff !important; border: none; border-radius: 5px; padding: 4px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+        .btn-pdf:hover { background: #2280BE !important; }
+        .btn-pdf:active, .btn-pdf:focus { background: #4A9FD5 !important; outline: none; }
+
+        .btn-edit { background: #FFF3CD !important; color: #633806 !important; border: none; border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-right: 5px; }
+        .btn-edit:hover { background: #FAC775 !important; }
+        .btn-edit:active, .btn-edit:focus { background: #FFF3CD !important; outline: none; }
+
+        .btn-delete { background: #FCEBEB !important; color: #791F1F !important; border: none; border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+        .btn-delete:hover { background: #F7C1C1 !important; }
+        .btn-delete:active, .btn-delete:focus { background: #FCEBEB !important; outline: none; }
+
+        .tbl-row:hover { background: #F5F8FC; }
+      `}</style>
+
       <div style={s.card}>
         <div style={s.cardHead}>
           <span style={s.cardTitle}>Surat Tugas</span>
@@ -121,7 +105,7 @@ function SuratTugas() {
                   </tr>
                 ) : (
                   dataSuratTugas.map((item, index) => (
-                    <tr key={item.id}>
+                    <tr key={item.id} className="tbl-row">
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
                         {index + 1}
                       </td>
@@ -144,27 +128,27 @@ function SuratTugas() {
                         {formatTanggal(item.tanggalSelesai)}
                       </td>
                       <td style={s.td}>
-                        <Btn
-                          style={s.btnPdf}
+                        <button
+                          className="btn-pdf"
                           onClick={() => window.open(item.file, "_blank")}
                         >
                           Lihat PDF
-                        </Btn>
+                        </button>
                       </td>
                       <td style={s.td}>
-                        <Btn
-                          style={s.btnEdit}
+                        <button
+                          className="btn-edit"
                           onClick={() => console.log("Edit:", item.id)}
                         >
                           Edit
-                        </Btn>
+                        </button>
                         {isAdmin && (
-                          <Btn
-                            style={s.btnDelete}
+                          <button
+                            className="btn-delete"
                             onClick={() => console.log("Delete:", item.id)}
                           >
                             Hapus
-                          </Btn>
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -193,12 +177,7 @@ function SuratTugas() {
 }
 
 const s = {
-  wrap: {
-    backgroundColor: "#F5F7FA",
-    minHeight: "100vh",
-    padding: "24px",
-    fontFamily: "'Inter', sans-serif",
-  },
+  wrap: { padding: "24px", fontFamily: "'DM Sans', sans-serif" },
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -249,44 +228,6 @@ const s = {
     borderRadius: 20,
     display: "inline-block",
     whiteSpace: "nowrap",
-  },
-  btnPdf: {
-    background: "#1A3A5C",
-    color: "#fff",
-    border: "none",
-    borderRadius: 5,
-    padding: "4px 10px",
-    fontSize: 11.5,
-    fontWeight: 600,
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-    userSelect: "none",
-    WebkitTapHighlightColor: "transparent",
-  },
-  btnEdit: {
-    background: "#1A3A5C",
-    color: "#fff",
-    border: "none",
-    borderRadius: 5,
-    padding: "4px 9px",
-    fontSize: 11.5,
-    fontWeight: 600,
-    cursor: "pointer",
-    marginRight: 5,
-    userSelect: "none",
-    WebkitTapHighlightColor: "transparent",
-  },
-  btnDelete: {
-    background: "#FCEBEB",
-    color: "#791F1F",
-    border: "none",
-    borderRadius: 5,
-    padding: "4px 9px",
-    fontSize: 11.5,
-    fontWeight: 600,
-    cursor: "pointer",
-    userSelect: "none",
-    WebkitTapHighlightColor: "transparent",
   },
   empty: { textAlign: "center", padding: 36, color: "#888", fontSize: 13 },
 };
