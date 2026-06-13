@@ -1,17 +1,11 @@
-import { useState, useRef, } from "react";
+import { useState, useRef } from "react";
 import logo from "../../assets/logo.jpeg";
 
-
-
-
 export default function Navbar({ sidebarCollapsed }) {
- 
   const [profileOpen, setProfileOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-
   const profileRef = useRef(null);
-
 
   return (
     <header
@@ -28,8 +22,7 @@ export default function Navbar({ sidebarCollapsed }) {
         justifyContent: "space-between",
         padding: "0 24px",
         zIndex: 90,
-        transition:
-          "left 0.25s cubic-bezier(.4,0,.2,1)",
+        transition: "left 0.25s cubic-bezier(.4,0,.2,1)",
       }}
     >
       {/* LEFT SECTION */}
@@ -104,9 +97,7 @@ export default function Navbar({ sidebarCollapsed }) {
 
           <input
             value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nomor surat, perihal..."
             style={{
               width: "320px",
@@ -122,16 +113,10 @@ export default function Navbar({ sidebarCollapsed }) {
           />
         </div>
 
-
         {/* PROFILE */}
-        <div
-          ref={profileRef}
-          style={{ position: "relative" }}
-        >
+        <div ref={profileRef} style={{ position: "relative" }}>
           <button
-            onClick={() =>
-              setProfileOpen(!profileOpen)
-            }
+            onClick={() => setProfileOpen(!profileOpen)}
             style={{
               display: "flex",
               alignItems: "center",
@@ -146,8 +131,7 @@ export default function Navbar({ sidebarCollapsed }) {
                 width: "38px",
                 height: "38px",
                 borderRadius: "50%",
-                background:
-                  "linear-gradient(135deg,#1B3F6E,#4DB6F5)",
+                background: "linear-gradient(135deg,#1B3F6E,#4DB6F5)",
                 color: "#FFF",
                 fontWeight: 700,
                 display: "flex",

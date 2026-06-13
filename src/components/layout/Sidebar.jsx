@@ -36,12 +36,11 @@ const navItems = [
     icon: "ti-calendar-time",
     path: "/retensi",
   },
-  
   {
-  name: "Manajemen User",
-  path: "/users",
-  icon: "ti-users",
-}
+    label: "Manajemen Akun", // ← diperbaiki: "name" → "label"
+    icon: "ti-users",
+    path: "/users",
+  },
 ];
 
 export default function Sidebar({ collapsed, onToggle }) {
@@ -70,15 +69,16 @@ export default function Sidebar({ collapsed, onToggle }) {
         boxShadow: "2px 0 16px rgba(15,42,74,.18)",
       }}
     >
-      {/* HEADER */}
+      {/* HEADER — Logo + Toggle */}
       <div
         style={{
           height: "68px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-start",
+          gap: "10px",
           paddingLeft: "16px",
           borderBottom: "1px solid rgba(255,255,255,.08)",
+          overflow: "hidden",
         }}
       >
         <button
@@ -86,6 +86,7 @@ export default function Sidebar({ collapsed, onToggle }) {
           style={{
             width: "40px",
             height: "40px",
+            flexShrink: 0,
             border: "none",
             borderRadius: "10px",
             background: "rgba(255,255,255,.08)",
@@ -97,16 +98,36 @@ export default function Sidebar({ collapsed, onToggle }) {
             transition: ".2s ease",
           }}
         >
-          <i
-            className="ti ti-menu-2"
-            style={{
-              fontSize: "22px",
-            }}
-          />
+          <i className="ti ti-menu-2" style={{ fontSize: "22px" }} />
         </button>
+
+        {/* Logo teks — hanya muncul saat tidak collapsed */}
+        {!collapsed && (
+          <div style={{ overflow: "hidden", whiteSpace: "nowrap" }}>
+            <div
+              style={{
+                fontSize: "16px",
+                fontWeight: 700,
+                color: "#fff",
+                fontFamily: "DM Sans",
+              }}
+            >
+              SIPAS
+            </div>
+            <div
+              style={{
+                fontSize: "10px",
+                color: "rgba(255,255,255,.5)",
+                fontFamily: "DM Sans",
+              }}
+            >
+              Sistem Pengelolaan Arsip Surat
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* LABEL */}
+      {/* LABEL MENU */}
       {!collapsed && (
         <div
           style={{
@@ -116,6 +137,7 @@ export default function Sidebar({ collapsed, onToggle }) {
             letterSpacing: ".12em",
             textTransform: "uppercase",
             color: "rgba(255,255,255,.35)",
+            fontFamily: "DM Sans",
           }}
         >
           Menu Utama
@@ -123,12 +145,7 @@ export default function Sidebar({ collapsed, onToggle }) {
       )}
 
       {/* MENU */}
-      <nav
-        style={{
-          flex: 1,
-          paddingTop: "4px",
-        }}
-      >
+      <nav style={{ flex: 1, paddingTop: "4px" }}>
         {navItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
@@ -148,28 +165,19 @@ export default function Sidebar({ collapsed, onToggle }) {
                 margin: "4px 10px",
                 borderRadius: "10px",
                 textDecoration: "none",
-                color: isActive
-                  ? "#FFFFFF"
-                  : "rgba(255,255,255,.65)",
-                background: isActive
-                  ? "rgba(77,182,245,.18)"
-                  : "transparent",
+                color: isActive ? "#FFFFFF" : "rgba(255,255,255,.65)",
+                background: isActive ? "rgba(77,182,245,.18)" : "transparent",
                 borderLeft: isActive
                   ? "3px solid #4DB6F5"
                   : "3px solid transparent",
-                justifyContent: collapsed
-                  ? "center"
-                  : "flex-start",
+                justifyContent: collapsed ? "center" : "flex-start",
                 transition: ".2s ease",
                 position: "relative",
               }}
             >
               <i
                 className={`ti ${item.icon}`}
-                style={{
-                  fontSize: "20px",
-                  flexShrink: 0,
-                }}
+                style={{ fontSize: "20px", flexShrink: 0 }}
               />
 
               {!collapsed && (
@@ -178,12 +186,14 @@ export default function Sidebar({ collapsed, onToggle }) {
                     fontFamily: "DM Sans",
                     fontSize: "14px",
                     fontWeight: isActive ? 600 : 500,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {item.label}
                 </span>
               )}
 
+              {/* Tooltip saat collapsed */}
               {collapsed && (
                 <span
                   className="sidebar-tooltip"
@@ -210,7 +220,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         })}
       </nav>
 
-      {/* FOOTER */}
+      {/* FOOTER — Keluar */}
       <div
         style={{
           padding: "12px 10px",
@@ -230,25 +240,20 @@ export default function Sidebar({ collapsed, onToggle }) {
             border: "none",
             background: "transparent",
             color: "rgba(255,255,255,.65)",
-            justifyContent: collapsed
-              ? "center"
-              : "flex-start",
+            justifyContent: collapsed ? "center" : "flex-start",
             cursor: "pointer",
             transition: ".2s ease",
+            fontFamily: "DM Sans",
           }}
         >
-          <i
-            className="ti ti-logout"
-            style={{
-              fontSize: "20px",
-            }}
-          />
+          <i className="ti ti-logout" style={{ fontSize: "20px" }} />
 
           {!collapsed && (
             <span
               style={{
                 fontSize: "14px",
                 fontFamily: "DM Sans",
+                whiteSpace: "nowrap",
               }}
             >
               Keluar
@@ -270,11 +275,8 @@ export default function Sidebar({ collapsed, onToggle }) {
           opacity: 1 !important;
         }
 
-        button:hover {
-          background: rgba(255,255,255,.15) !important;
-        }
-
         .logout-btn:hover {
+          background: rgba(255,255,255,.10) !important;
           color: #FFFFFF !important;
         }
       `}</style>
