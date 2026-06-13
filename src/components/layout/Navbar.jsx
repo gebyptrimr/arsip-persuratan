@@ -1,11 +1,17 @@
 import { useState, useRef } from "react";
 import logo from "../../assets/logo.jpeg";
+import { useSearch } from "../../Contextt/SearchContext";
+import { useEffect } from "react";
 
 export default function Navbar({ sidebarCollapsed }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [search, setSearch] = useState("");
-
+  const { setSearchTerm } = useSearch();
   const profileRef = useRef(null);
+
+  useEffect(() => {
+    setSearchTerm(search);
+  }, [search, setSearchTerm]);
 
   return (
     <header
@@ -97,15 +103,8 @@ export default function Navbar({ sidebarCollapsed }) {
 
           <input
             value={search}
-<<<<<<< HEAD
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            placeholder="Cari..."
-=======
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nomor surat, perihal..."
->>>>>>> cf7a6dae6e26c9855788ce23a8c1f087c34d4801
             style={{
               width: "320px",
               height: "40px",

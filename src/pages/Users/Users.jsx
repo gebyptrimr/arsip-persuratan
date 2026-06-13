@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Users.css";
+import { useSearch } from "../../Contextt/SearchContext";
+import { globalFilter } from "../../utils/filterData";
 
 function Users() {
   const [selectedUser, setSelectedUser] = useState(null);
   const navigate = useNavigate();
+  const { searchTerm } = useSearch();
 
   const users = [
     {
@@ -73,6 +76,11 @@ function Users() {
       hak: ["Dashboard", "Surat Tugas"],
     },
   ];
+
+  const filteredUsers = globalFilter(
+  users,
+  searchTerm
+);
 
   const stats = [
     {
@@ -180,7 +188,9 @@ function Users() {
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="white" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               Daftar Akun Staf
-              <span className="users-count">{users.length} Akun</span>
+              <span className="users-count">
+               {filteredUsers.length} Akun
+              </span>
             </div>
           </div>
 
@@ -197,7 +207,7 @@ function Users() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => (
+              {filteredUsers.map((user, index) => (
                 <tr
                   key={user.id}
                   className={selectedUser?.id === user.id ? "row-selected" : ""}
@@ -253,7 +263,7 @@ function Users() {
           </table>
 
           <div className="users-footer">
-            <span>Menampilkan 1 - {users.length} dari {users.length} akun</span>
+            <span> Menampilkan {filteredUsers.length} dari {users.length} akun</span>
             <div className="pagination">
               <button className="page-btn">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="#475569" strokeWidth="2" strokeLinecap="round"/></svg>

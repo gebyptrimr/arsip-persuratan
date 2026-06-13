@@ -1,4 +1,6 @@
-// Sambung dari context/session auth
+import { useSearch } from "../../Contextt/SearchContext";
+import { globalFilter } from "../../utils/filterData";
+
 const currentRole = "admin"; // "admin" | "user"
 
 const dataSuratTugas = [
@@ -56,6 +58,13 @@ function formatTanggal(dateStr) {
 function SuratTugas() {
   const isAdmin = currentRole === "admin";
 
+  const { searchTerm } = useSearch();
+
+  const filteredSurat = globalFilter(
+    dataSuratTugas,
+    searchTerm
+  );
+
   return (
     <div style={s.wrap}>
       <style>{`
@@ -77,7 +86,7 @@ function SuratTugas() {
       <div style={s.card}>
         <div style={s.cardHead}>
           <span style={s.cardTitle}>Surat Tugas</span>
-          <span style={s.cntBadge}>{dataSuratTugas.length} Surat Tugas</span>
+          <span style={s.cntBadge}>{filteredSurat.length} Surat Tugas</span>
         </div>
 
         <div style={s.cardBody}>
@@ -97,14 +106,14 @@ function SuratTugas() {
                 </tr>
               </thead>
               <tbody>
-                {dataSuratTugas.length === 0 ? (
+                {filteredSurat.length === 0 ? (
                   <tr>
                     <td colSpan={9} style={s.empty}>
                       Tidak ada data ditemukan
                     </td>
                   </tr>
                 ) : (
-                  dataSuratTugas.map((item, index) => (
+                  filteredSurat.map((item, index) => (
                     <tr key={item.id} className="tbl-row">
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
                         {index + 1}
@@ -166,7 +175,7 @@ function SuratTugas() {
             }}
           >
             <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {dataSuratTugas.length} dari {dataSuratTugas.length}{" "}
+              Menampilkan {filteredSurat.length} dari {dataSuratTugas.length}{" "}
               surat tugas
             </span>
           </div>

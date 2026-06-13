@@ -1,61 +1,66 @@
-// Sambung dari context/session auth
-const currentRole = "admin"; // "admin" | "user"
-
-const dataKontrak = [
-  {
-    id: 1,
-    nomorKontrak: "KTR-001/2025",
-    judulKontrak: "Kerja Sama Sistem Arsip",
-    pihakPertama: "Universitas ABC",
-    pihakKedua: "PT XYZ",
-    tanggalKontrak: "2026-06-07",
-    tanggalBerakhir: "2027-06-07",
-    file: "kontrak_001.pdf",
-  },
-  {
-    id: 2,
-    nomorKontrak: "KTR-002/2025",
-    judulKontrak: "Penyediaan Layanan Cloud",
-    pihakPertama: "LP2M UNM",
-    pihakKedua: "CV. Teknologi Maju",
-    tanggalKontrak: "2026-01-15",
-    tanggalBerakhir: "2026-12-31",
-    file: "kontrak_002.pdf",
-  },
-  {
-    id: 3,
-    nomorKontrak: "KTR-003/2025",
-    judulKontrak: "Pengadaan Peralatan Laboratorium",
-    pihakPertama: "Universitas Negeri Makassar",
-    pihakKedua: "PT. Sains Indonesia",
-    tanggalKontrak: "2026-03-10",
-    tanggalBerakhir: "2026-09-10",
-    file: "kontrak_003.pdf",
-  },
-];
-
-function formatTanggal(dateStr) {
-  const bulan = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "Mei",
-    "Jun",
-    "Jul",
-    "Ags",
-    "Sep",
-    "Okt",
-    "Nov",
-    "Des",
-  ];
-  const [y, m, d] = dateStr.split("-");
-  return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
-}
+import { useSearch } from "../../Contextt/SearchContext";
+import { globalFilter } from "../../utils/filterData";
 
 function Kontrak() {
+  const { searchTerm } = useSearch();
+  const currentRole = "admin"; // "admin" | "user"
   const isAdmin = currentRole === "admin";
+
+  const dataKontrak = [
+    {
+      id: 1,
+      nomorKontrak: "KTR-001/2025",
+      judulKontrak: "Kerja Sama Sistem Arsip",
+      pihakPertama: "Universitas ABC",
+      pihakKedua: "PT XYZ",
+      tanggalKontrak: "2026-06-07",
+      tanggalBerakhir: "2027-06-07",
+      file: "kontrak_001.pdf",
+    },
+    {
+      id: 2,
+      nomorKontrak: "KTR-002/2025",
+      judulKontrak: "Penyediaan Layanan Cloud",
+      pihakPertama: "LP2M UNM",
+      pihakKedua: "CV. Teknologi Maju",
+      tanggalKontrak: "2026-01-15",
+      tanggalBerakhir: "2026-12-31",
+      file: "kontrak_002.pdf",
+    },
+    {
+      id: 3,
+      nomorKontrak: "KTR-003/2025",
+      judulKontrak: "Pengadaan Peralatan Laboratorium",
+      pihakPertama: "Universitas Negeri Makassar",
+      pihakKedua: "PT. Sains Indonesia",
+      tanggalKontrak: "2026-03-10",
+      tanggalBerakhir: "2026-09-10",
+      file: "kontrak_003.pdf",
+    },
+  ];
+
+  const filteredKontrak = globalFilter(dataKontrak, searchTerm);
   const colSpanEmpty = isAdmin ? 9 : 8;
+
+  function formatTanggal(dateStr) {
+    const bulan = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mei",
+      "Jun",
+      "Jul",
+      "Ags",
+      "Sep",
+      "Okt",
+      "Nov",
+      "Des",
+    ];
+
+    const [y, m, d] = dateStr.split("-");
+    return `${parseInt(d, 10)} ${bulan[parseInt(m, 10) - 1]} ${y}`;
+  }
 
   return (
     <div style={s.wrap}>
@@ -78,7 +83,7 @@ function Kontrak() {
       <div style={s.card}>
         <div style={s.cardHead}>
           <span style={s.cardTitle}>Kontrak</span>
-          <span style={s.cntBadge}>{dataKontrak.length} kontrak</span>
+          <span style={s.cntBadge}>{filteredKontrak.length} kontrak</span>
         </div>
 
         <div style={s.cardBody}>
@@ -98,14 +103,14 @@ function Kontrak() {
                 </tr>
               </thead>
               <tbody>
-                {dataKontrak.length === 0 ? (
+                {filteredKontrak.length === 0 ? (
                   <tr>
                     <td colSpan={colSpanEmpty} style={s.empty}>
                       Tidak ada data ditemukan
                     </td>
                   </tr>
                 ) : (
-                  dataKontrak.map((item, index) => (
+                  filteredKontrak.map((item, index) => (
                     <tr key={item.id} className="tbl-row">
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
                         {index + 1}
@@ -167,7 +172,7 @@ function Kontrak() {
             }}
           >
             <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {dataKontrak.length} dari {dataKontrak.length} kontrak
+              Menampilkan {filteredKontrak.length} dari {dataKontrak.length} kontrak
             </span>
           </div>
         </div>

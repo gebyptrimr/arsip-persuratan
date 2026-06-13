@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-import { useEffect } from "react";
+import { useSearch } from "../../Contextt/SearchContext";
+import { globalFilter } from "../../utils/filterData";
 
-// ── Simulasi role aktif: ganti "admin" <-> "user" untuk test
-=======
-// Sambung dari context/session auth
->>>>>>> cf7a6dae6e26c9855788ce23a8c1f087c34d4801
 const currentRole = "admin"; // "admin" | "user"
 
 const dataSK = [
@@ -53,8 +49,12 @@ function formatTanggal(dateStr) {
   return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
 }
 
-function SK() {
+function SuratKeputusan() {
+  const { searchTerm } = useSearch();
+
   const isAdmin = currentRole === "admin";
+
+  const filteredSurat = globalFilter(dataSK, searchTerm);
 
   return (
     <div style={s.wrap}>
@@ -77,7 +77,7 @@ function SK() {
       <div style={s.card}>
         <div style={s.cardHead}>
           <span style={s.cardTitle}>Surat Keputusan</span>
-          <span style={s.cntBadge}>{dataSK.length} SK</span>
+          <span style={s.cntBadge}>{filteredSurat.length} SK</span>
         </div>
 
         <div style={s.cardBody}>
@@ -95,14 +95,14 @@ function SK() {
                 </tr>
               </thead>
               <tbody>
-                {dataSK.length === 0 ? (
+                {filteredSurat.length === 0 ? (
                   <tr>
                     <td colSpan={7} style={s.empty}>
                       Tidak ada data ditemukan
                     </td>
                   </tr>
                 ) : (
-                  dataSK.map((item, index) => (
+                  filteredSurat.map((item, index) => (
                     <tr key={item.id} className="tbl-row">
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
                         {index + 1}
@@ -158,7 +158,7 @@ function SK() {
             }}
           >
             <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {dataSK.length} dari {dataSK.length} SK
+              Menampilkan {filteredSurat.length} dari {dataSK.length} SK
             </span>
           </div>
         </div>
@@ -223,4 +223,4 @@ const s = {
   empty: { textAlign: "center", padding: 36, color: "#888", fontSize: 13 },
 };
 
-export default SK;
+export default SuratKeputusan;

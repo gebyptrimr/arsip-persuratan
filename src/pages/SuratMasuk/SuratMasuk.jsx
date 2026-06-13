@@ -1,6 +1,6 @@
-import React from "react";
+import { useSearch } from "../../Contextt/SearchContext";
+import { globalFilter } from "../../utils/filterData";
 
-// Sambung dari context/session auth
 const isAdmin = true;
 
 const dataSurat = [
@@ -16,6 +16,13 @@ function formatTanggal(dateStr) {
 }
 
 function SuratMasuk() {
+  const { searchTerm } = useSearch();
+
+  const filteredSurat = globalFilter(
+    dataSurat,
+    searchTerm
+  );
+
   return (
     <div style={s.wrap}>
       <style>{`
@@ -37,7 +44,7 @@ function SuratMasuk() {
       <div style={s.card}>
         <div style={s.cardHead}>
           <span style={s.cardTitle}>Surat Masuk</span>
-          <span style={s.cntBadge}>{dataSurat.length} surat</span>
+          <span style={s.cntBadge}>{filteredSurat.length} surat</span>
         </div>
 
         <div style={s.cardBody}>
@@ -56,7 +63,7 @@ function SuratMasuk() {
                 </tr>
               </thead>
               <tbody>
-                {dataSurat.map((item, index) => (
+                {filteredSurat.map((item, index) => (
                   <tr key={item.id} className="tbl-row">
                     <td style={{ ...s.td, color: "#888", fontSize: 12 }}>{index + 1}</td>
                     <td style={s.td}><span style={s.nomorBadge}>{item.nomorSurat}</span></td>
@@ -81,7 +88,7 @@ function SuratMasuk() {
 
           <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
             <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {dataSurat.length} dari {dataSurat.length} surat
+              Menampilkan {filteredSurat.length} dari {dataSurat.length} surat
             </span>
           </div>
         </div>

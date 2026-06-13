@@ -25,17 +25,12 @@ function InjectStyle() {
 
 function SipasButton({ type = "button", baseStyle, onClick, children }) {
   const [pressed, setPressed] = React.useState(false);
-  const [hovered, setHovered] = React.useState(false);
   return (
     <button
       type={type}
       className="sipas-btn"
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false);
-        setPressed(false);
-      }}
+      onMouseLeave={() => setPressed(false)}
       onMouseDown={() => setPressed(true)}
       onMouseUp={() => setPressed(false)}
       onTouchStart={() => setPressed(true)}

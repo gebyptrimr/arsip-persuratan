@@ -24,8 +24,6 @@ import UploadArsip from "../pages/UploadArsip/UploadArsip";
 import KontrakTambah from "../pages/UploadArsip/KontrakTambah";
 import SKTambah from "../pages/UploadArsip/SKTambah";
 import SuratTugasTambah from "../pages/UploadArsip/SuratTugasTambah";
-import SuratMasukTambah from "../pages/UploadArsip/SuratMasukTambah";
-import SuratKeluarTambah from "../pages/UploadArsip/SuratKeluarTambah";
 
 // Retensi
 import RetensiArsip from "../pages/RetensiArsip/RetensiArsip";
@@ -57,7 +55,10 @@ function AppRoutes() {
           element={<KontrakTambah />}
         />
 
-        <Route path="/upload-arsip/sk-tambah" element={<SKTambah />} />
+        <Route
+          path="/upload-arsip/sk-tambah"
+          element={<SKTambah />}
+        />
 
         <Route
           path="/upload-arsip/surat-tugas-tambah"
@@ -65,14 +66,6 @@ function AppRoutes() {
         />
 
         <Route path="/retensi" element={<RetensiArsip />} />
-        <Route
-          path="/upload-arsip/surat-masuk-tambah"
-          element={<SuratMasukTambah />}
-        />
-        <Route
-          path="/upload-arsip/surat-keluar-tambah"
-          element={<SuratKeluarTambah />}
-        />
       </Route>
     </Routes>
   );
