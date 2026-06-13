@@ -1,3 +1,23 @@
+import React, { useEffect } from "react";
+
+// ── Simulasi role aktif: ganti "admin" <-> "user" untuk test
+const currentRole = "admin"; // "admin" | "user"
+
+const globalStyle = `
+  button:active { outline: none !important; }
+  button:focus  { outline: none !important; }
+`;
+
+function InjectStyle() {
+  useEffect(() => {
+    const tag = document.createElement("style");
+    tag.innerHTML = globalStyle;
+    document.head.appendChild(tag);
+    return () => document.head.removeChild(tag);
+  }, []);
+  return null;
+}
+
 const dataSK = [
   {
     id: 1,
@@ -40,17 +60,33 @@ function formatTanggal(dateStr) {
     "Nov",
     "Des",
   ];
-
   const [y, m, d] = dateStr.split("-");
   return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
 }
 
+function Btn({ style, onClick, children }) {
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      style={{ ...style, display: "inline-block" }}
+      onClick={onClick}
+      onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+    >
+      {children}
+    </span>
+  );
+}
+
 function SK() {
+  const isAdmin = currentRole === "admin"; // ganti jadi admin/user
+
   return (
     <div style={s.wrap}>
+      <InjectStyle />
       <div style={s.card}>
         <div style={s.cardHead}>
-          <span style={s.cardTitle}>Arsip SK</span>
+          <span style={s.cardTitle}>Surat Keputusan</span>
           <span style={s.cntBadge}>{dataSK.length} SK</span>
         </div>
 
@@ -68,54 +104,58 @@ function SK() {
                   <th style={{ ...s.th, width: 140 }}>Aksi</th>
                 </tr>
               </thead>
-
               <tbody>
-                {dataSK.map((item, index) => (
-                  <tr key={item.id}>
-                    <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                      {index + 1}
-                    </td>
-
-                    <td style={s.td}>
-                      <span style={s.nomorBadge}>{item.nomorSK}</span>
-                    </td>
-
-                    <td style={{ ...s.td, fontSize: 12.5 }}>{item.judulSK}</td>
-
-                    <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                      {formatTanggal(item.tanggalSK)}
-                    </td>
-
-                    <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>
-                      {item.pejabatPenetap}
-                    </td>
-
-                    <td style={s.td}>
-                      <button
-                        style={s.btnPdf}
-                        onClick={() => window.open(item.file, "_blank")}
-                      >
-                        Lihat PDF
-                      </button>
-                    </td>
-
-                    <td style={s.td}>
-                      <button
-                        style={s.btnEdit}
-                        onClick={() => console.log("Edit:", item.id)}
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        style={s.btnDelete}
-                        onClick={() => console.log("Delete:", item.id)}
-                      >
-                        Hapus
-                      </button>
+                {dataSK.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} style={s.empty}>
+                      Tidak ada data ditemukan
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  dataSK.map((item, index) => (
+                    <tr key={item.id}>
+                      <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
+                        {index + 1}
+                      </td>
+                      <td style={s.td}>
+                        <span style={s.nomorBadge}>{item.nomorSK}</span>
+                      </td>
+                      <td style={{ ...s.td, fontSize: 12.5 }}>
+                        {item.judulSK}
+                      </td>
+                      <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
+                        {formatTanggal(item.tanggalSK)}
+                      </td>
+                      <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>
+                        {item.pejabatPenetap}
+                      </td>
+                      <td style={s.td}>
+                        <Btn
+                          style={s.btnPdf}
+                          onClick={() => window.open(item.file, "_blank")}
+                        >
+                          Lihat PDF
+                        </Btn>
+                      </td>
+                      <td style={s.td}>
+                        <Btn
+                          style={s.btnEdit}
+                          onClick={() => console.log("Edit:", item.id)}
+                        >
+                          Edit
+                        </Btn>
+                        {isAdmin && (
+                          <Btn
+                            style={s.btnDelete}
+                            onClick={() => console.log("Delete:", item.id)}
+                          >
+                            Hapus
+                          </Btn>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -144,14 +184,12 @@ const s = {
     padding: "24px",
     fontFamily: "'Inter', sans-serif",
   },
-
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
     border: "0.5px solid #e0e0e0",
     overflow: "hidden",
   },
-
   cardHead: {
     backgroundColor: "#1A3A5C",
     padding: "16px 22px",
@@ -159,13 +197,7 @@ const s = {
     alignItems: "center",
     gap: 10,
   },
-
-  cardTitle: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: 600,
-  },
-
+  cardTitle: { color: "#fff", fontSize: 15, fontWeight: 600 },
   cntBadge: {
     background: "rgba(255,255,255,0.15)",
     color: "#fff",
@@ -174,17 +206,20 @@ const s = {
     padding: "2px 10px",
     borderRadius: 20,
   },
-
-  cardBody: {
-    padding: "18px 22px",
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
+  btnTambah: {
+    background: "#4A9FD5",
+    color: "#fff",
+    border: "none",
+    borderRadius: 7,
+    padding: "6px 14px",
     fontSize: 12.5,
+    fontWeight: 600,
+    cursor: "pointer",
+    userSelect: "none",
+    WebkitTapHighlightColor: "transparent",
   },
-
+  cardBody: { padding: "18px 22px" },
+  table: { width: "100%", borderCollapse: "collapse", fontSize: 12.5 },
   th: {
     padding: "9px 12px",
     fontSize: 10.5,
@@ -196,14 +231,12 @@ const s = {
     textAlign: "left",
     whiteSpace: "nowrap",
   },
-
   td: {
     padding: "12px 12px",
     borderBottom: "0.5px solid #f0f0f0",
     verticalAlign: "middle",
     color: "#1A1A1A",
   },
-
   nomorBadge: {
     background: "#E6F1FB",
     color: "#0C447C",
@@ -214,9 +247,8 @@ const s = {
     display: "inline-block",
     whiteSpace: "nowrap",
   },
-
   btnPdf: {
-    background: "#4A9FD5",
+    background: "#1A3A5C",
     color: "#fff",
     border: "none",
     borderRadius: 5,
@@ -225,11 +257,12 @@ const s = {
     fontWeight: 600,
     cursor: "pointer",
     whiteSpace: "nowrap",
+    userSelect: "none",
+    WebkitTapHighlightColor: "transparent",
   },
-
   btnEdit: {
-    background: "#FFF3CD",
-    color: "#633806",
+    background: "#1A3A5C",
+    color: "#fff",
     border: "none",
     borderRadius: 5,
     padding: "4px 9px",
@@ -237,8 +270,9 @@ const s = {
     fontWeight: 600,
     cursor: "pointer",
     marginRight: 5,
+    userSelect: "none",
+    WebkitTapHighlightColor: "transparent",
   },
-
   btnDelete: {
     background: "#FCEBEB",
     color: "#791F1F",
@@ -248,7 +282,10 @@ const s = {
     fontSize: 11.5,
     fontWeight: 600,
     cursor: "pointer",
+    userSelect: "none",
+    WebkitTapHighlightColor: "transparent",
   },
+  empty: { textAlign: "center", padding: 36, color: "#888", fontSize: 13 },
 };
 
 export default SK;

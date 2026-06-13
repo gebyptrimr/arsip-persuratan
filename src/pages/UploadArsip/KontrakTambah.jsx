@@ -1,7 +1,60 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
-// ─── Field Component ──────────────────────────────────────────
+function InjectStyle() {
+  useEffect(() => {
+    const id = "sipas-btn-style";
+    if (document.getElementById(id)) return;
+    const tag = document.createElement("style");
+    tag.id = id;
+    tag.innerHTML = `
+      .sipas-btn { -webkit-appearance: none !important; appearance: none !important; }
+      .sipas-btn:focus { outline: none !important; box-shadow: none !important; }
+      .sipas-btn:hover { background-color: inherit !important; color: inherit !important; }
+      .sipas-btn:active { background-color: inherit !important; color: inherit !important; border: inherit !important; }
+      .sipas-btn::-moz-focus-inner { border: 0 !important; }
+    `;
+    document.head.appendChild(tag);
+    return () => {
+      const t = document.getElementById(id);
+      if (t) t.remove();
+    };
+  }, []);
+  return null;
+}
+
+function SipasButton({ type = "button", baseStyle, onClick, children }) {
+  const [pressed, setPressed] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <button
+      type={type}
+      className="sipas-btn"
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => {
+        setHovered(false);
+        setPressed(false);
+      }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      style={{
+        ...baseStyle,
+        opacity: pressed ? 0.85 : 1,
+        transform: pressed ? "scale(0.985)" : "scale(1)",
+        transition: "opacity 0.08s, transform 0.08s",
+        // Force background and color to always use baseStyle values
+        backgroundColor: baseStyle.background,
+        color: baseStyle.color,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
 function Field({ label, children, half }) {
   return (
     <div style={{ ...s.fieldWrap, width: half ? "calc(50% - 8px)" : "100%" }}>
@@ -11,7 +64,6 @@ function Field({ label, children, half }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────
 function KontrakTambah() {
   const [fileName, setFileName] = useState("");
 
@@ -27,8 +79,8 @@ function KontrakTambah() {
 
   return (
     <div style={s.wrap}>
+      <InjectStyle />
       <div style={s.card}>
-        {/* Header */}
         <div style={s.cardHead}>
           <div style={s.decCircle1} />
           <div style={s.decCircle2} />
@@ -45,11 +97,10 @@ function KontrakTambah() {
               <polyline points="14 2 14 8 20 8" />
               <line x1="16" y1="13" x2="8" y2="13" />
               <line x1="16" y1="17" x2="8" y2="17" />
-              <polyline points="10 9 9 9 8 9" />
             </svg>
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={s.cardTitle}>Tambah Arsip Kontrak</div>
+            <div style={s.cardTitle}>Tambah Kontrak</div>
             <div style={s.cardSub}>
               Kontrak · LP2M Universitas Negeri Makassar
             </div>
@@ -61,10 +112,8 @@ function KontrakTambah() {
           </div>
         </div>
 
-        {/* Body */}
         <div style={s.cardBody}>
           <form onSubmit={handleSubmit}>
-            {/* Section: Identitas Kontrak */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -90,7 +139,6 @@ function KontrakTambah() {
               </div>
             </div>
 
-            {/* Section: Para Pihak */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -114,7 +162,6 @@ function KontrakTambah() {
               </div>
             </div>
 
-            {/* Section: Periode */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -130,7 +177,6 @@ function KontrakTambah() {
               </div>
             </div>
 
-            {/* Section: Upload */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -219,9 +265,12 @@ function KontrakTambah() {
               </Field>
             </div>
 
-            {/* Actions */}
             <div style={s.actionBar}>
-              <button type="button" style={s.btnBatal}>
+              <SipasButton
+                type="button"
+                baseStyle={s.btnBatal}
+                onClick={() => console.log("Batal")}
+              >
                 <svg
                   width="14"
                   height="14"
@@ -235,8 +284,8 @@ function KontrakTambah() {
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
                 Batal
-              </button>
-              <button type="submit" style={s.btnSimpan}>
+              </SipasButton>
+              <SipasButton type="submit" baseStyle={s.btnSimpan}>
                 <svg
                   width="15"
                   height="15"
@@ -251,7 +300,7 @@ function KontrakTambah() {
                   <polyline points="7 3 7 8 15 8" />
                 </svg>
                 Simpan Arsip
-              </button>
+              </SipasButton>
             </div>
           </form>
         </div>
@@ -260,7 +309,6 @@ function KontrakTambah() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────
 const s = {
   wrap: {
     backgroundColor: "#F5F7FA",
@@ -356,7 +404,6 @@ const s = {
   },
   stepText: { fontSize: 11, color: "rgba(255,255,255,0.8)", fontWeight: 500 },
   cardBody: { padding: "28px 28px 24px" },
-
   sectionBlock: { marginBottom: 24 },
   sectionHead: {
     display: "flex",
@@ -381,7 +428,6 @@ const s = {
     borderBottom: "1.5px solid #EAF3FB",
     flex: 1,
   },
-
   row: { display: "flex", gap: 16, flexWrap: "wrap" },
   fieldWrap: { display: "flex", flexDirection: "column", marginBottom: 14 },
   label: {
@@ -403,7 +449,6 @@ const s = {
     boxSizing: "border-box",
     transition: "border .15s",
   },
-
   uploadBox: {
     display: "flex",
     alignItems: "center",
@@ -441,7 +486,6 @@ const s = {
     borderRadius: 8,
     padding: "7px 14px",
   },
-
   actionBar: {
     display: "flex",
     justifyContent: "flex-end",
@@ -451,7 +495,7 @@ const s = {
     marginTop: 8,
   },
   btnBatal: {
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
     background: "#F3F4F6",
     color: "#374151",
@@ -463,7 +507,7 @@ const s = {
     cursor: "pointer",
   },
   btnSimpan: {
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
     background: "#1A3A5C",
     color: "#fff",

@@ -1,5 +1,59 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
+
+function InjectStyle() {
+  useEffect(() => {
+    const id = "sipas-btn-style";
+    if (document.getElementById(id)) return;
+    const tag = document.createElement("style");
+    tag.id = id;
+    tag.innerHTML = `
+      .sipas-btn { -webkit-appearance: none !important; appearance: none !important; }
+      .sipas-btn:focus { outline: none !important; box-shadow: none !important; }
+      .sipas-btn:hover { background-color: inherit !important; color: inherit !important; }
+      .sipas-btn:active { background-color: inherit !important; color: inherit !important; border: inherit !important; }
+      .sipas-btn::-moz-focus-inner { border: 0 !important; }
+    `;
+    document.head.appendChild(tag);
+    return () => {
+      const t = document.getElementById(id);
+      if (t) t.remove();
+    };
+  }, []);
+  return null;
+}
+
+function SipasButton({ type = "button", baseStyle, onClick, children }) {
+  const [pressed, setPressed] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <button
+      type={type}
+      className="sipas-btn"
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => {
+        setHovered(false);
+        setPressed(false);
+      }}
+      onMouseDown={() => setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onTouchStart={() => setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
+      style={{
+        ...baseStyle,
+        opacity: pressed ? 0.85 : 1,
+        transform: pressed ? "scale(0.985)" : "scale(1)",
+        transition: "opacity 0.08s, transform 0.08s",
+        // Force background and color to always use baseStyle values
+        backgroundColor: baseStyle.background,
+        color: baseStyle.color,
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
 // ─── Field Component ──────────────────────────────────────────
 function Field({ label, children, half, required }) {
@@ -31,13 +85,12 @@ function SKTambah() {
 
   return (
     <div style={s.wrap}>
+      <InjectStyle />
       <div style={s.card}>
         {/* ── Card Header ── */}
         <div style={s.cardHead}>
-          {/* Decorative circles */}
           <div style={s.decCircle1} />
           <div style={s.decCircle2} />
-
           <div style={s.headIcon}>
             <svg
               width="20"
@@ -52,13 +105,11 @@ function SKTambah() {
             </svg>
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={s.cardTitle}>Tambah Arsip SK</div>
+            <div style={s.cardTitle}>Tambah Surat Keputusan</div>
             <div style={s.cardSub}>
               Surat Keputusan · LP2M Universitas Negeri Makassar
             </div>
           </div>
-
-          {/* Step badge */}
           <div style={{ flex: 1, position: "relative", zIndex: 1 }} />
           <div style={s.stepBadge}>
             <span style={s.stepNum}>1</span>
@@ -266,7 +317,11 @@ function SKTambah() {
 
             {/* ── Actions ── */}
             <div style={s.actionBar}>
-              <button type="button" style={s.btnBatal}>
+              <SipasButton
+                type="button"
+                baseStyle={s.btnBatal}
+                onClick={() => console.log("Batal")}
+              >
                 <svg
                   width="14"
                   height="14"
@@ -280,8 +335,8 @@ function SKTambah() {
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
                 Batal
-              </button>
-              <button type="submit" style={s.btnSimpan}>
+              </SipasButton>
+              <SipasButton type="submit" baseStyle={s.btnSimpan}>
                 <svg
                   width="14"
                   height="14"
@@ -296,7 +351,7 @@ function SKTambah() {
                   <polyline points="7 3 7 8 15 8" />
                 </svg>
                 Simpan Arsip
-              </button>
+              </SipasButton>
             </div>
           </form>
         </div>
@@ -313,8 +368,6 @@ const s = {
     padding: "24px",
     fontFamily: "'Inter', sans-serif",
   },
-
-  // ── Card
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
@@ -402,10 +455,8 @@ const s = {
     color: "#fff",
   },
   stepText: { fontSize: 11, color: "rgba(255,255,255,0.8)", fontWeight: 500 },
-
   cardBody: { padding: "28px 28px 24px" },
 
-  // ── Sections
   sectionBlock: { marginBottom: 24 },
   sectionHead: {
     display: "flex",
@@ -431,7 +482,6 @@ const s = {
     flex: 1,
   },
 
-  // ── Form fields
   row: { display: "flex", gap: 16, flexWrap: "wrap" },
   fieldWrap: { display: "flex", flexDirection: "column", marginBottom: 14 },
   label: {
@@ -465,7 +515,6 @@ const s = {
     transition: "border .15s, box-shadow .15s",
   },
 
-  // ── Upload
   uploadBox: {
     display: "flex",
     alignItems: "center",
@@ -477,11 +526,7 @@ const s = {
     cursor: "pointer",
     transition: "background .15s",
   },
-  uploadInner: {
-    display: "flex",
-    alignItems: "center",
-    gap: 16,
-  },
+  uploadInner: { display: "flex", alignItems: "center", gap: 16 },
   uploadIconWrap: {
     width: 52,
     height: 52,
@@ -508,7 +553,6 @@ const s = {
     padding: "7px 14px",
   },
 
-  // ── Action bar
   actionBar: {
     display: "flex",
     justifyContent: "flex-end",
@@ -518,7 +562,7 @@ const s = {
     marginTop: 8,
   },
   btnBatal: {
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
     background: "#F3F4F6",
     color: "#374151",
@@ -528,9 +572,11 @@ const s = {
     fontSize: 13,
     fontWeight: 600,
     cursor: "pointer",
+    userSelect: "none",
+    WebkitTapHighlightColor: "transparent",
   },
   btnSimpan: {
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
     background: "#1A3A5C",
     color: "#fff",
@@ -540,6 +586,8 @@ const s = {
     fontSize: 13,
     fontWeight: 600,
     cursor: "pointer",
+    userSelect: "none",
+    WebkitTapHighlightColor: "transparent",
   },
 };
 

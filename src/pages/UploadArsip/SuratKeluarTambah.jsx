@@ -69,15 +69,34 @@ function Field({ label, children, half, required }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────
-function SuratTugasTambah() {
+function SuratKeluarTambah() {
   const [fileName, setFileName] = useState("");
+  const [formData, setFormData] = useState({
+    nomorSurat: "",
+    tanggalSurat: "",
+    tujuan: "",
+    perihal: "",
+    file: null,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFileName(file?.name || "");
+    setFormData((prev) => ({ ...prev, file }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData);
     Swal.fire({
       icon: "success",
       title: "Berhasil!",
-      text: "Data Surat Tugas berhasil disimpan.",
+      text: "Data Surat Keluar berhasil disimpan.",
       confirmButtonColor: "#1A3A5C",
       confirmButtonText: "Oke",
     });
@@ -87,7 +106,7 @@ function SuratTugasTambah() {
     <div style={s.wrap}>
       <InjectStyle />
       <div style={s.card}>
-        {/* ── Card Header ── */}
+        {/* ── Header ── */}
         <div style={s.cardHead}>
           <div style={s.decCircle1} />
           <div style={s.decCircle2} />
@@ -107,175 +126,85 @@ function SuratTugasTambah() {
             </svg>
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={s.cardTitle}>Tambah Surat Tugas</div>
+            <div style={s.cardTitle}>Tambah Surat Keluar</div>
             <div style={s.cardSub}>
-              Surat Tugas · LP2M Universitas Negeri Makassar
+              Surat Keluar · LP2M Universitas Negeri Makassar
             </div>
           </div>
-          <div style={{ flex: 1, position: "relative", zIndex: 1 }} />
+          <div style={{ flex: 1 }} />
           <div style={s.stepBadge}>
             <div style={s.stepNum}>1</div>
             <span style={s.stepText}>Isi Formulir</span>
           </div>
         </div>
 
-        {/* ── Card Body ── */}
+        {/* ── Body ── */}
         <div style={s.cardBody}>
           <form onSubmit={handleSubmit}>
-            {/* ── Section: Identitas Surat ── */}
+            {/* Identitas Surat */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
-                <span style={s.sectionLabel}>Identitas Surat Tugas</span>
+                <span style={s.sectionLabel}>Identitas Surat Keluar</span>
               </div>
               <div style={s.row}>
-                <Field label="Nomor Surat Tugas" half required>
-                  <div style={s.inputWrap}>
-                    <svg
-                      style={s.inputIcon}
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#aaa"
-                      strokeWidth="2"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="2" />
-                      <path d="M3 9h18M9 21V9" />
-                    </svg>
-                    <input
-                      type="text"
-                      style={s.input}
-                      placeholder="Contoh: ST-001/2025"
-                      required
-                    />
-                  </div>
+                <Field label="Nomor Surat" half required>
+                  <input
+                    type="text"
+                    name="nomorSurat"
+                    value={formData.nomorSurat}
+                    onChange={handleChange}
+                    style={s.input}
+                    placeholder="Contoh: 001/SK/2025"
+                    required
+                  />
                 </Field>
                 <Field label="Tanggal Surat" half required>
-                  <div style={s.inputWrap}>
-                    <svg
-                      style={s.inputIcon}
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#aaa"
-                      strokeWidth="2"
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                    <input type="date" style={s.input} required />
-                  </div>
+                  <input
+                    type="date"
+                    name="tanggalSurat"
+                    value={formData.tanggalSurat}
+                    onChange={handleChange}
+                    style={s.input}
+                    required
+                  />
                 </Field>
               </div>
             </div>
 
-            {/* ── Section: Penugasan ── */}
+            {/* Informasi Surat */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
-                <span style={s.sectionLabel}>Detail Penugasan</span>
+                <span style={s.sectionLabel}>Informasi Surat</span>
               </div>
               <div style={s.row}>
-                <Field label="Penerima Tugas" half required>
-                  <div style={s.inputWrap}>
-                    <svg
-                      style={s.inputIcon}
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#aaa"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="8" r="4" />
-                      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                    </svg>
-                    <input
-                      type="text"
-                      style={s.input}
-                      placeholder="Nama penerima tugas"
-                      required
-                    />
-                  </div>
+                <Field label="Tujuan" half required>
+                  <input
+                    type="text"
+                    name="tujuan"
+                    value={formData.tujuan}
+                    onChange={handleChange}
+                    style={s.input}
+                    placeholder="Contoh: BKD"
+                    required
+                  />
                 </Field>
-                <Field label="Tujuan Tugas" half required>
-                  <div style={s.inputWrap}>
-                    <svg
-                      style={s.inputIcon}
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#aaa"
-                      strokeWidth="2"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    <input
-                      type="text"
-                      style={s.input}
-                      placeholder="Tujuan / keperluan tugas"
-                      required
-                    />
-                  </div>
+                <Field label="Perihal" half required>
+                  <input
+                    type="text"
+                    name="perihal"
+                    value={formData.perihal}
+                    onChange={handleChange}
+                    style={s.input}
+                    placeholder="Perihal Surat"
+                    required
+                  />
                 </Field>
               </div>
             </div>
 
-            {/* ── Section: Periode ── */}
-            <div style={s.sectionBlock}>
-              <div style={s.sectionHead}>
-                <div style={s.sectionDot} />
-                <span style={s.sectionLabel}>Periode Pelaksanaan</span>
-              </div>
-              <div style={s.row}>
-                <Field label="Tanggal Mulai" half required>
-                  <div style={s.inputWrap}>
-                    <svg
-                      style={s.inputIcon}
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#aaa"
-                      strokeWidth="2"
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                    <input type="date" style={s.input} required />
-                  </div>
-                </Field>
-                <Field label="Tanggal Selesai" half required>
-                  <div style={s.inputWrap}>
-                    <svg
-                      style={s.inputIcon}
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#aaa"
-                      strokeWidth="2"
-                    >
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                    <input type="date" style={s.input} required />
-                  </div>
-                </Field>
-              </div>
-            </div>
-
-            {/* ── Section: Dokumen ── */}
+            {/* Dokumen */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -288,7 +217,7 @@ function SuratTugasTambah() {
                     accept=".pdf"
                     required
                     style={{ display: "none" }}
-                    onChange={(e) => setFileName(e.target.files[0]?.name || "")}
+                    onChange={handleFileChange}
                   />
                   {fileName ? (
                     <div style={s.filePreview}>
@@ -364,7 +293,7 @@ function SuratTugasTambah() {
               </Field>
             </div>
 
-            {/* ── Actions ── */}
+            {/* Actions */}
             <div style={s.actionBar}>
               <SipasButton
                 type="button"
@@ -399,7 +328,7 @@ function SuratTugasTambah() {
                   <polyline points="17 21 17 13 7 13 7 21" />
                   <polyline points="7 3 7 8 15 8" />
                 </svg>
-                Simpan Surat Tugas
+                Simpan Surat Keluar
               </SipasButton>
             </div>
           </form>
@@ -420,8 +349,8 @@ const s = {
   card: {
     backgroundColor: "#fff",
     borderRadius: 14,
-    border: "0.5px solid #e0e0e0",
     overflow: "hidden",
+    border: "0.5px solid #e0e0e0",
   },
   cardHead: {
     backgroundColor: "#1A3A5C",
@@ -536,24 +465,14 @@ const s = {
   label: {
     fontSize: 12,
     fontWeight: 600,
-    color: "#374151",
     marginBottom: 6,
+    color: "#374151",
     letterSpacing: 0.1,
-    display: "flex",
-    alignItems: "center",
-    gap: 4,
   },
-  requiredDot: { color: "#E24B4A", fontSize: 13, lineHeight: 1 },
-  inputWrap: { position: "relative", display: "flex", alignItems: "center" },
-  inputIcon: {
-    position: "absolute",
-    left: 10,
-    pointerEvents: "none",
-    flexShrink: 0,
-  },
+  requiredDot: { color: "#E24B4A", marginLeft: 2 },
   input: {
     width: "100%",
-    padding: "9px 12px 9px 32px",
+    padding: "9px 12px",
     border: "0.5px solid #D1D5DB",
     borderRadius: 8,
     fontSize: 13,
@@ -561,7 +480,7 @@ const s = {
     backgroundColor: "#FAFAFA",
     color: "#1A1A1A",
     boxSizing: "border-box",
-    transition: "border .15s, box-shadow .15s",
+    transition: "border .15s",
   },
 
   uploadBox: {
@@ -606,8 +525,8 @@ const s = {
     display: "flex",
     justifyContent: "flex-end",
     gap: 10,
-    paddingTop: 20,
     borderTop: "1px solid #F0F0F0",
+    paddingTop: 20,
     marginTop: 8,
   },
   btnBatal: {
@@ -640,4 +559,4 @@ const s = {
   },
 };
 
-export default SuratTugasTambah;
+export default SuratKeluarTambah;

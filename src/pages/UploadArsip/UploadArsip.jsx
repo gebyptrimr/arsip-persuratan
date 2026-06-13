@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+function InjectStyle() {
+  useEffect(() => {
+    const tag = document.createElement("style");
+    tag.innerHTML = `
+      span[role="button"] { -webkit-tap-highlight-color: transparent !important; }
+      span[role="button"]:active { opacity: 1 !important; background: inherit !important; }
+    `;
+    document.head.appendChild(tag);
+    return () => document.head.removeChild(tag);
+  }, []);
+  return null;
+}
 
 const jenisArsip = [
   {
-    value: "kontrak",
-    label: "Kontrak",
-    desc: "Arsip perjanjian kerja sama antar pihak",
+    value: "surat-masuk",
+    label: "Surat Masuk",
+    desc: "Arsip surat yang diterima dari pihak eksternal",
     icon: (
       <svg
         width="22"
@@ -15,16 +28,37 @@ const jenisArsip = [
         stroke="currentColor"
         strokeWidth="1.8"
       >
-        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-        <line x1="16" y1="13" x2="8" y2="13" />
-        <line x1="16" y1="17" x2="8" y2="17" />
+        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91" />
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 9l9 6 9-6" />
+        <polyline points="12 15 12 19" />
+        <polyline points="9 18 12 21 15 18" />
+      </svg>
+    ),
+  },
+  {
+    value: "surat-keluar",
+    label: "Surat Keluar",
+    desc: "Arsip surat yang dikirim ke pihak eksternal",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 9l9 6 9-6" />
+        <polyline points="12 9 12 5" />
+        <polyline points="9 6 12 3 15 6" />
       </svg>
     ),
   },
   {
     value: "sk",
-    label: "SK",
+    label: "Surat Keputusan",
     desc: "Surat Keputusan dari pejabat berwenang",
     icon: (
       <svg
@@ -61,6 +95,26 @@ const jenisArsip = [
       </svg>
     ),
   },
+  {
+    value: "kontrak",
+    label: "Kontrak",
+    desc: "Arsip perjanjian kerja sama antar pihak",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+      </svg>
+    ),
+  },
 ];
 
 function UploadArsip() {
@@ -68,14 +122,18 @@ function UploadArsip() {
   const navigate = useNavigate();
 
   const handleLanjut = () => {
-    if (jenis === "kontrak") navigate("/upload-arsip/kontrak-tambah");
+    if (jenis === "surat-masuk") navigate("/upload-arsip/surat-masuk-tambah");
+    else if (jenis === "surat-keluar")
+      navigate("/upload-arsip/surat-keluar-tambah");
     else if (jenis === "sk") navigate("/upload-arsip/sk-tambah");
     else if (jenis === "surat-tugas")
       navigate("/upload-arsip/surat-tugas-tambah");
+    else if (jenis === "kontrak") navigate("/upload-arsip/kontrak-tambah");
   };
 
   return (
     <div style={s.wrap}>
+      <InjectStyle />
       <div style={s.card}>
         {/* ── Header ── */}
         <div style={s.cardHead}>
@@ -167,9 +225,11 @@ function UploadArsip() {
 
           {/* Action */}
           <div style={s.actionBar}>
-            <button
-              onClick={handleLanjut}
-              disabled={!jenis}
+            <span
+              role="button"
+              tabIndex={0}
+              onClick={jenis ? handleLanjut : undefined}
+              onKeyDown={(e) => e.key === "Enter" && jenis && handleLanjut()}
               style={{
                 ...s.btnLanjut,
                 opacity: !jenis ? 0.45 : 1,
@@ -188,7 +248,7 @@ function UploadArsip() {
               >
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
-            </button>
+            </span>
           </div>
         </div>
       </div>
@@ -337,7 +397,7 @@ const s = {
 
   actionBar: { display: "flex", justifyContent: "flex-end" },
   btnLanjut: {
-    display: "flex",
+    display: "inline-flex",
     alignItems: "center",
     background: "#1A3A5C",
     color: "#fff",
@@ -347,6 +407,10 @@ const s = {
     fontSize: 13,
     fontWeight: 700,
     transition: "opacity .15s",
+    userSelect: "none",
+    WebkitTapHighlightColor: "transparent",
+    WebkitUserSelect: "none",
+    textDecoration: "none",
   },
 };
 
