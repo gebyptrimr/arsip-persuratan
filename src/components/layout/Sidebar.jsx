@@ -36,6 +36,12 @@ const navItems = [
     icon: "ti-calendar-time",
     path: "/retensi",
   },
+  
+  {
+  name: "Manajemen User",
+  path: "/users",
+  icon: "ti-users",
+}
 ];
 
 export default function Sidebar({ collapsed, onToggle }) {

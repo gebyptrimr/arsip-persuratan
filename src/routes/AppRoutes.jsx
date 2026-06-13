@@ -2,6 +2,8 @@ import { Routes, Route } from "react-router-dom";
 
 import MainLayout from "../components/layout/MainLayout";
 
+// Users
+import Users from "../pages/Users/Users";
 // Auth
 import Login from "../pages/Login/Login";
 
@@ -34,7 +36,7 @@ function AppRoutes() {
       <Route element={<MainLayout />}>
         {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
-
+        <Route path="/users" element={<Users />} />
         {/* Arsip */}
         <Route path="/surat-masuk" element={<SuratMasuk />} />
         <Route path="/surat-keluar" element={<SuratKeluar />} />
