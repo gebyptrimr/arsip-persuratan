@@ -1,6 +1,4 @@
-import React, { useState } from "react";
-
-const isAdmin = true;
+import { useState } from "react";
 
 const dataRetensi = [
   {
@@ -125,6 +123,14 @@ function RetensiArsip() {
             <span style={s.cardTitle}>Daftar Arsip</span>
             <span style={s.cntBadge}>{filtered.length} arsip</span>
           </div>
+          <input
+            type="text"
+            className="search-input"
+            style={s.searchInput}
+            placeholder="Cari nomor, jenis, status..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
 
         <div style={{ overflowX: "auto" }}>

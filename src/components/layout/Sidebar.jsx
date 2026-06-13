@@ -1,10 +1,10 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 const navItems = [
   {
     label: "Dashboard",
     icon: "ti-layout-dashboard",
-    path: "/",
+    path: "/dashboard",
   },
   {
     label: "Surat Masuk",
@@ -31,17 +31,26 @@ const navItems = [
     icon: "ti-writing",
     path: "/kontrak",
   },
-
-   {
+  {
     label: "Retensi Arsip",
     icon: "ti-calendar-time",
     path: "/retensi",
   },
-
+  
+  {
+  name: "Manajemen User",
+  path: "/users",
+  icon: "ti-users",
+}
 ];
 
 export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/");
+  };
 
   return (
     <aside
@@ -123,7 +132,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         {navItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
-            (item.path !== "/" &&
+            (item.path !== "/dashboard" &&
               location.pathname.startsWith(item.path));
 
           return (
@@ -135,9 +144,7 @@ export default function Sidebar({ collapsed, onToggle }) {
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",
-                padding: collapsed
-                  ? "12px 0"
-                  : "12px 16px",
+                padding: collapsed ? "12px 0" : "12px 16px",
                 margin: "4px 10px",
                 borderRadius: "10px",
                 textDecoration: "none",
@@ -210,19 +217,24 @@ export default function Sidebar({ collapsed, onToggle }) {
           borderTop: "1px solid rgba(255,255,255,.08)",
         }}
       >
-        <NavLink
-          to="/settings"
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
           style={{
+            width: "100%",
             display: "flex",
             alignItems: "center",
             gap: "12px",
             padding: "10px 12px",
             borderRadius: "10px",
-            textDecoration: "none",
+            border: "none",
+            background: "transparent",
             color: "rgba(255,255,255,.65)",
             justifyContent: collapsed
               ? "center"
               : "flex-start",
+            cursor: "pointer",
+            transition: ".2s ease",
           }}
         >
           <i
@@ -242,7 +254,7 @@ export default function Sidebar({ collapsed, onToggle }) {
               Keluar
             </span>
           )}
-        </NavLink>
+        </button>
       </div>
 
       <style>{`
@@ -260,6 +272,10 @@ export default function Sidebar({ collapsed, onToggle }) {
 
         button:hover {
           background: rgba(255,255,255,.15) !important;
+        }
+
+        .logout-btn:hover {
+          color: #FFFFFF !important;
         }
       `}</style>
     </aside>
