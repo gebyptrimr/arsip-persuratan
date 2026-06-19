@@ -10,8 +10,8 @@ function Kontrak() {
     {
       id: 1,
       nomorKontrak: "KTR-001/2025",
-      judulKontrak: "Kerja Sama Sistem Arsip",
-      pihakPertama: "Universitas ABC",
+      skema: "Penelitian",
+      judulSkema: "Kerja Sama Sistem Arsip Digital",
       pihakKedua: "PT XYZ",
       tanggalKontrak: "2026-06-07",
       tanggalBerakhir: "2027-06-07",
@@ -20,8 +20,8 @@ function Kontrak() {
     {
       id: 2,
       nomorKontrak: "KTR-002/2025",
-      judulKontrak: "Penyediaan Layanan Cloud",
-      pihakPertama: "LP2M UNM",
+      skema: "Pengabdian",
+      judulSkema: "Penyediaan Layanan Cloud Masyarakat",
       pihakKedua: "CV. Teknologi Maju",
       tanggalKontrak: "2026-01-15",
       tanggalBerakhir: "2026-12-31",
@@ -30,8 +30,8 @@ function Kontrak() {
     {
       id: 3,
       nomorKontrak: "KTR-003/2025",
-      judulKontrak: "Pengadaan Peralatan Laboratorium",
-      pihakPertama: "Universitas Negeri Makassar",
+      skema: "Penelitian",
+      judulSkema: "Pengadaan Peralatan Laboratorium Sains",
       pihakKedua: "PT. Sains Indonesia",
       tanggalKontrak: "2026-03-10",
       tanggalBerakhir: "2026-09-10",
@@ -40,7 +40,7 @@ function Kontrak() {
   ];
 
   const filteredKontrak = globalFilter(dataKontrak, searchTerm);
-  const colSpanEmpty = isAdmin ? 9 : 8;
+  const colSpanEmpty = 9;
 
   function formatTanggal(dateStr) {
     const bulan = [
@@ -57,10 +57,20 @@ function Kontrak() {
       "Nov",
       "Des",
     ];
-
     const [y, m, d] = dateStr.split("-");
     return `${parseInt(d, 10)} ${bulan[parseInt(m, 10) - 1]} ${y}`;
   }
+
+  const skemaBadgeStyle = (skema) => ({
+    display: "inline-block",
+    padding: "2px 9px",
+    borderRadius: 20,
+    fontSize: 11,
+    fontWeight: 600,
+    background: skema === "Penelitian" ? "#EAF4FF" : "#F0FFF4",
+    color: skema === "Penelitian" ? "#1A5FA8" : "#166534",
+    whiteSpace: "nowrap",
+  });
 
   return (
     <div style={s.wrap}>
@@ -93,13 +103,13 @@ function Kontrak() {
                 <tr>
                   <th style={{ ...s.th, width: 36 }}>No</th>
                   <th style={{ ...s.th, width: 130 }}>Nomor Kontrak</th>
-                  <th style={s.th}>Judul Kontrak</th>
-                  <th style={{ ...s.th, width: 140 }}>Pihak Pertama</th>
-                  <th style={{ ...s.th, width: 140 }}>Pihak Kedua</th>
+                  <th style={{ ...s.th, width: 110 }}>Skema</th>
+                  <th style={s.th}>Judul Skema</th>
+                  <th style={{ ...s.th, width: 150 }}>Pihak Kedua</th>
                   <th style={{ ...s.th, width: 110 }}>Tgl. Kontrak</th>
                   <th style={{ ...s.th, width: 110 }}>Tgl. Berakhir</th>
                   <th style={{ ...s.th, width: 95 }}>File PDF</th>
-                  {isAdmin && <th style={{ ...s.th, width: 140 }}>Aksi</th>}
+                  <th style={{ ...s.th, width: 140 }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -118,13 +128,15 @@ function Kontrak() {
                       <td style={s.td}>
                         <span style={s.nomorBadge}>{item.nomorKontrak}</span>
                       </td>
+                      <td style={s.td}>
+                        <span style={skemaBadgeStyle(item.skema)}>
+                          {item.skema}
+                        </span>
+                      </td>
                       <td style={{ ...s.td, fontSize: 12.5 }}>
-                        {item.judulKontrak}
+                        {item.judulSkema}
                       </td>
                       <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>
-                        {item.pihakPertama}
-                      </td>
-                      <td style={{ ...s.td, fontSize: 12.5 }}>
                         {item.pihakKedua}
                       </td>
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
@@ -141,22 +153,22 @@ function Kontrak() {
                           Lihat PDF
                         </button>
                       </td>
-                      {isAdmin && (
-                        <td style={s.td}>
-                          <button
-                            className="btn-edit"
-                            onClick={() => console.log("Edit:", item.id)}
-                          >
-                            Edit
-                          </button>
+                      <td style={s.td}>
+                        <button
+                          className="btn-edit"
+                          onClick={() => console.log("Edit:", item.id)}
+                        >
+                          Edit
+                        </button>
+                        {isAdmin && (
                           <button
                             className="btn-delete"
                             onClick={() => console.log("Delete:", item.id)}
                           >
                             Hapus
                           </button>
-                        </td>
-                      )}
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -172,7 +184,8 @@ function Kontrak() {
             }}
           >
             <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {filteredKontrak.length} dari {dataKontrak.length} kontrak
+              Menampilkan {filteredKontrak.length} dari {dataKontrak.length}{" "}
+              kontrak
             </span>
           </div>
         </div>
