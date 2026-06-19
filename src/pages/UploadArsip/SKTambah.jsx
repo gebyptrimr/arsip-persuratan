@@ -105,7 +105,7 @@ function SKTambah() {
             </svg>
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={s.cardTitle}>Tambah Surat Keputusan</div>
+            <div style={s.cardTitle}>Tambah Arsip SK</div>
             <div style={s.cardSub}>
               Surat Keputusan · LP2M Universitas Negeri Makassar
             </div>
@@ -171,6 +171,42 @@ function SKTambah() {
                       placeholder="Masukkan judul SK"
                       required
                     />
+                  </div>
+                </Field>
+              </div>
+              <div style={s.row}>
+                <Field label="Jenis SK" half required>
+                  <div style={s.selectWrap}>
+                    <svg
+                      style={s.selectIconLeft}
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#aaa"
+                      strokeWidth="2"
+                    >
+                      <path d="M9 11l3 3L22 4" />
+                      <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                    </svg>
+                    <select style={s.select} defaultValue="" required>
+                      <option value="" disabled>
+                        -- Pilih Jenis SK --
+                      </option>
+                      <option value="penelitian">Penelitian</option>
+                      <option value="pengabdian">Pengabdian</option>
+                    </select>
+                    <svg
+                      style={s.selectIconRight}
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#888"
+                      strokeWidth="2"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
                   </div>
                 </Field>
               </div>
@@ -499,6 +535,41 @@ const s = {
   inputIcon: {
     position: "absolute",
     left: 10,
+    pointerEvents: "none",
+    flexShrink: 0,
+  },
+
+  // ── Select dropdown
+  selectWrap: {
+    position: "relative",
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+  },
+  select: {
+    width: "100%",
+    padding: "9px 36px 9px 32px",
+    border: "0.5px solid #D1D5DB",
+    borderRadius: 8,
+    fontSize: 13,
+    outline: "none",
+    backgroundColor: "#FAFAFA",
+    color: "#1A1A1A",
+    boxSizing: "border-box",
+    appearance: "none",
+    WebkitAppearance: "none",
+    cursor: "pointer",
+    transition: "border .15s",
+  },
+  selectIconLeft: {
+    position: "absolute",
+    left: 10,
+    pointerEvents: "none",
+    flexShrink: 0,
+  },
+  selectIconRight: {
+    position: "absolute",
+    right: 10,
     pointerEvents: "none",
     flexShrink: 0,
   },
