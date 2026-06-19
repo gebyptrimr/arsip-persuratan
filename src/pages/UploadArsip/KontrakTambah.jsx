@@ -25,17 +25,12 @@ function InjectStyle() {
 
 function SipasButton({ type = "button", baseStyle, onClick, children }) {
   const [pressed, setPressed] = React.useState(false);
-  const [hovered, setHovered] = React.useState(false);
   return (
     <button
       type={type}
       className="sipas-btn"
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false);
-        setPressed(false);
-      }}
+      onMouseLeave={() => setPressed(false)}
       onMouseDown={() => setPressed(true)}
       onMouseUp={() => setPressed(false)}
       onTouchStart={() => setPressed(true)}
@@ -45,7 +40,6 @@ function SipasButton({ type = "button", baseStyle, onClick, children }) {
         opacity: pressed ? 0.85 : 1,
         transform: pressed ? "scale(0.985)" : "scale(1)",
         transition: "opacity 0.08s, transform 0.08s",
-        // Force background and color to always use baseStyle values
         backgroundColor: baseStyle.background,
         color: baseStyle.color,
       }}
@@ -66,6 +60,7 @@ function Field({ label, children, half }) {
 
 function KontrakTambah() {
   const [fileName, setFileName] = useState("");
+  const [skema, setSkema] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -81,6 +76,7 @@ function KontrakTambah() {
     <div style={s.wrap}>
       <InjectStyle />
       <div style={s.card}>
+        {/* ── Header ── */}
         <div style={s.cardHead}>
           <div style={s.decCircle1} />
           <div style={s.decCircle2} />
@@ -112,8 +108,10 @@ function KontrakTambah() {
           </div>
         </div>
 
+        {/* ── Body ── */}
         <div style={s.cardBody}>
           <form onSubmit={handleSubmit}>
+            {/* Identitas Kontrak */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -128,28 +126,45 @@ function KontrakTambah() {
                     required
                   />
                 </Field>
-                <Field label="Judul Kontrak *" half>
-                  <input
-                    type="text"
-                    style={s.input}
-                    placeholder="Masukkan judul kontrak"
-                    required
-                  />
+                <Field label="Skema *" half>
+                  <div style={s.selectWrap}>
+                    <select
+                      style={s.select}
+                      value={skema}
+                      onChange={(e) => setSkema(e.target.value)}
+                      required
+                    >
+                      <option value="" disabled>
+                        -- Pilih Skema --
+                      </option>
+                      <option value="penelitian">Penelitian</option>
+                      <option value="pengabdian">Pengabdian</option>
+                    </select>
+                    {/* Ikon chevron custom */}
+                    <svg
+                      style={s.selectIcon}
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#888"
+                      strokeWidth="2"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
                 </Field>
               </div>
             </div>
 
+            {/* Para Pihak */}
             <div style={s.sectionBlock}>
-              <div style={s.sectionHead}>
-                <div style={s.sectionDot} />
-                <span style={s.sectionLabel}>Para Pihak</span>
-              </div>
               <div style={s.row}>
-                <Field label="Pihak Pertama" half>
+                <Field label="Judul Skema" half>
                   <input
                     type="text"
                     style={s.input}
-                    placeholder="Nama instansi / lembaga pihak pertama"
+                    placeholder="Judul Skema"
                   />
                 </Field>
                 <Field label="Pihak Kedua" half>
@@ -162,6 +177,7 @@ function KontrakTambah() {
               </div>
             </div>
 
+            {/* Periode Kontrak */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -177,6 +193,7 @@ function KontrakTambah() {
               </div>
             </div>
 
+            {/* Dokumen */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}>
                 <div style={s.sectionDot} />
@@ -265,6 +282,7 @@ function KontrakTambah() {
               </Field>
             </div>
 
+            {/* Actions */}
             <div style={s.actionBar}>
               <SipasButton
                 type="button"
@@ -449,6 +467,32 @@ const s = {
     boxSizing: "border-box",
     transition: "border .15s",
   },
+
+  // Select dropdown
+  selectWrap: { position: "relative", width: "100%" },
+  select: {
+    width: "100%",
+    padding: "9px 36px 9px 12px",
+    border: "0.5px solid #D1D5DB",
+    borderRadius: 8,
+    fontSize: 13,
+    outline: "none",
+    backgroundColor: "#FAFAFA",
+    color: "#1A1A1A",
+    boxSizing: "border-box",
+    appearance: "none",
+    WebkitAppearance: "none",
+    cursor: "pointer",
+    transition: "border .15s",
+  },
+  selectIcon: {
+    position: "absolute",
+    right: 12,
+    top: "50%",
+    transform: "translateY(-50%)",
+    pointerEvents: "none",
+  },
+
   uploadBox: {
     display: "flex",
     alignItems: "center",

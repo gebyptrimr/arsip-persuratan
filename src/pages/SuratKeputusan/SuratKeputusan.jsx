@@ -8,6 +8,7 @@ const dataSK = [
     id: 1,
     nomorSK: "SK-001/2025",
     judulSK: "Pengangkatan Tim Arsip",
+    jenisSK: "Penelitian",
     tanggalSK: "2026-06-07",
     pejabatPenetap: "Kepala Dinas",
     file: "sk_001.pdf",
@@ -16,6 +17,7 @@ const dataSK = [
     id: 2,
     nomorSK: "SK-002/2025",
     judulSK: "Penetapan Struktur Organisasi LP2M",
+    jenisSK: "Pengabdian",
     tanggalSK: "2026-03-15",
     pejabatPenetap: "Rektor UNM",
     file: "sk_002.pdf",
@@ -24,6 +26,7 @@ const dataSK = [
     id: 3,
     nomorSK: "SK-003/2025",
     judulSK: "Penunjukan Koordinator Penelitian",
+    jenisSK: "Penelitian",
     tanggalSK: "2026-01-20",
     pejabatPenetap: "Dekan Fakultas",
     file: "sk_003.pdf",
@@ -46,15 +49,24 @@ function formatTanggal(dateStr) {
     "Des",
   ];
   const [y, m, d] = dateStr.split("-");
-  return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
+  return `${parseInt(d, 10)} ${bulan[parseInt(m, 10) - 1]} ${y}`;
 }
+
+const jenisBadgeStyle = (jenis) => ({
+  display: "inline-block",
+  padding: "2px 9px",
+  borderRadius: 20,
+  fontSize: 11,
+  fontWeight: 600,
+  background: jenis === "Penelitian" ? "#EAF4FF" : "#F0FFF4",
+  color: jenis === "Penelitian" ? "#1A5FA8" : "#166534",
+  whiteSpace: "nowrap",
+});
 
 function SuratKeputusan() {
   const { searchTerm } = useSearch();
-
   const isAdmin = currentRole === "admin";
-
-  const filteredSurat = globalFilter(dataSK, searchTerm);
+  const filteredSK = globalFilter(dataSK, searchTerm);
 
   return (
     <div style={s.wrap}>
@@ -77,7 +89,7 @@ function SuratKeputusan() {
       <div style={s.card}>
         <div style={s.cardHead}>
           <span style={s.cardTitle}>Surat Keputusan</span>
-          <span style={s.cntBadge}>{filteredSurat.length} SK</span>
+          <span style={s.cntBadge}>{filteredSK.length} SK</span>
         </div>
 
         <div style={s.cardBody}>
@@ -87,6 +99,7 @@ function SuratKeputusan() {
                 <tr>
                   <th style={{ ...s.th, width: 36 }}>No</th>
                   <th style={{ ...s.th, width: 130 }}>Nomor SK</th>
+                  <th style={{ ...s.th, width: 110 }}>Jenis SK</th>
                   <th style={s.th}>Judul SK</th>
                   <th style={{ ...s.th, width: 110 }}>Tgl. SK</th>
                   <th style={{ ...s.th, width: 150 }}>Pejabat Penetap</th>
@@ -95,20 +108,25 @@ function SuratKeputusan() {
                 </tr>
               </thead>
               <tbody>
-                {filteredSurat.length === 0 ? (
+                {filteredSK.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={s.empty}>
+                    <td colSpan={8} style={s.empty}>
                       Tidak ada data ditemukan
                     </td>
                   </tr>
                 ) : (
-                  filteredSurat.map((item, index) => (
+                  filteredSK.map((item, index) => (
                     <tr key={item.id} className="tbl-row">
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
                         {index + 1}
                       </td>
                       <td style={s.td}>
                         <span style={s.nomorBadge}>{item.nomorSK}</span>
+                      </td>
+                      <td style={s.td}>
+                        <span style={jenisBadgeStyle(item.jenisSK)}>
+                          {item.jenisSK}
+                        </span>
                       </td>
                       <td style={{ ...s.td, fontSize: 12.5 }}>
                         {item.judulSK}
@@ -158,7 +176,7 @@ function SuratKeputusan() {
             }}
           >
             <span style={{ fontSize: 11.5, color: "#888" }}>
-              Menampilkan {filteredSurat.length} dari {dataSK.length} SK
+              Menampilkan {filteredSK.length} dari {dataSK.length} SK
             </span>
           </div>
         </div>
