@@ -20,20 +20,29 @@ function Login() {
     setErrorMessage("");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+      console.log("LOGIN DATA:", data);
+      console.log("LOGIN ERROR:", error);
 
       if (error) {
         setErrorMessage(error.message);
         return;
       }
 
-      navigate("/dashboard");
-    } catch (error) {
-      setErrorMessage("Terjadi kesalahan saat login");
-      console.error(error);
+      if (data.user) {
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      console.error("CATCH ERROR:", err);
+
+      setErrorMessage(
+        "Terjadi kesalahan saat menghubungi server."
+      );
     } finally {
       setLoading(false);
     }
@@ -68,7 +77,9 @@ function Login() {
               type="email"
               placeholder="Masukkan email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
               required
             />
           </div>
@@ -80,7 +91,9 @@ function Login() {
               type="password"
               placeholder="Masukkan password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
               required
             />
           </div>
@@ -89,8 +102,11 @@ function Login() {
             <div
               style={{
                 color: "#dc2626",
+                background: "#fee2e2",
+                padding: "10px",
+                borderRadius: "8px",
+                marginBottom: "15px",
                 fontSize: "14px",
-                marginBottom: "12px",
               }}
             >
               {errorMessage}
@@ -102,7 +118,9 @@ function Login() {
             className="login-btn"
             disabled={loading}
           >
-            {loading ? "Memproses..." : "Masuk ke SIPAS"}
+            {loading
+              ? "Memproses..."
+              : "Masuk ke SIPAS"}
           </button>
         </form>
       </div>

@@ -3,3 +3,34 @@
 body {
   font-family: 'DM Sans', sans-serif;
 }
+
+.swal-confirm-btn {
+  background: #163f72;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-family: "DM Sans";
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.swal-confirm-btn:hover {
+  background: #0f315a;
+}
+
+.swal-cancel-btn {
+  background: #f1f3f5;
+  color: #495057;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-family: "DM Sans";
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+.swal-cancel-btn:hover {
+  background: #e9ecef;
+}

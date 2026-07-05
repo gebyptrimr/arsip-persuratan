@@ -1,4 +1,6 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { supabase } from "../../lib/supabase";
 
 const navItems = [
   {
@@ -47,9 +49,23 @@ export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    navigate("/");
-  };
+const handleLogout = async () => {
+  const result = await Swal.fire({
+    title: "Keluar dari SIPAS?",
+    text: "Apakah Anda yakin ingin mengakhiri sesi login?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Keluar",
+    cancelButtonText: "Batal",
+    reverseButtons: true,
+  });
+
+  if (!result.isConfirmed) return;
+
+  await supabase.auth.signOut();
+
+  navigate("/");
+};
 
   return (
     <aside
@@ -246,7 +262,10 @@ export default function Sidebar({ collapsed, onToggle }) {
             fontFamily: "DM Sans",
           }}
         >
-          <i className="ti ti-logout" style={{ fontSize: "20px" }} />
+          <i
+            className="ti ti-logout"
+            style={{ fontSize: "20px" }}
+          />
 
           {!collapsed && (
             <span
