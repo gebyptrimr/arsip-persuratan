@@ -1,43 +1,82 @@
 import { useSearch } from "../../Contextt/SearchContext";
 import { globalFilter } from "../../utils/filterData";
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
+import KontrakEdit from "../EditSurat/KontrakEdit";
+import Swal from "sweetalert2";
 
 function Kontrak() {
   const { searchTerm } = useSearch();
   const currentRole = "admin"; // "admin" | "user"
   const isAdmin = currentRole === "admin";
 
-  const dataKontrak = [
-    {
-      id: 1,
-      nomorKontrak: "KTR-001/2025",
-      skema: "Penelitian",
-      judulSkema: "Kerja Sama Sistem Arsip Digital",
-      pihakKedua: "PT XYZ",
-      tanggalKontrak: "2026-06-07",
-      tanggalBerakhir: "2027-06-07",
-      file: "kontrak_001.pdf",
-    },
-    {
-      id: 2,
-      nomorKontrak: "KTR-002/2025",
-      skema: "Pengabdian",
-      judulSkema: "Penyediaan Layanan Cloud Masyarakat",
-      pihakKedua: "CV. Teknologi Maju",
-      tanggalKontrak: "2026-01-15",
-      tanggalBerakhir: "2026-12-31",
-      file: "kontrak_002.pdf",
-    },
-    {
-      id: 3,
-      nomorKontrak: "KTR-003/2025",
-      skema: "Penelitian",
-      judulSkema: "Pengadaan Peralatan Laboratorium Sains",
-      pihakKedua: "PT. Sains Indonesia",
-      tanggalKontrak: "2026-03-10",
-      tanggalBerakhir: "2026-09-10",
-      file: "kontrak_003.pdf",
-    },
-  ];
+  const [dataKontrak, setDataKontrak] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editItem, setEditItem] = useState(null); // null = modal tertutup
+
+  useEffect(() => {
+    getKontrak();
+  }, []);
+
+  async function getKontrak() {
+    try {
+      const { data, error } = await supabase
+        .from("kontrak")
+        .select("*")
+        .order("id", { ascending: false });
+      if (error) throw error;
+      setDataKontrak(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleDelete = async (id, fileUrl) => {
+    const result = await Swal.fire({
+      title: "Hapus kontrak?",
+      text: "Data yang dihapus tidak dapat dikembalikan.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      // Hapus file dari Storage
+      if (fileUrl) {
+        const filePath = fileUrl.split("/storage/v1/object/public/kontrak/")[1];
+
+        if (filePath) {
+          await supabase.storage.from("kontrak").remove([filePath]);
+        }
+      }
+
+      // Hapus data dari tabel
+      const { error } = await supabase.from("kontrak").delete().eq("id", id);
+
+      if (error) throw error;
+
+      await Swal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Data kontrak berhasil dihapus",
+      });
+
+      getKontrak(); // sesuaikan dengan fungsi refresh data Anda
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal",
+        text: err.message,
+      });
+    }
+  };
 
   const filteredKontrak = globalFilter(dataKontrak, searchTerm);
   const colSpanEmpty = 9;
@@ -67,10 +106,18 @@ function Kontrak() {
     borderRadius: 20,
     fontSize: 11,
     fontWeight: 600,
+    whiteSpace: "nowrap",
     background: skema === "Penelitian" ? "#EAF4FF" : "#F0FFF4",
     color: skema === "Penelitian" ? "#1A5FA8" : "#166534",
-    whiteSpace: "nowrap",
   });
+
+  if (loading) {
+    return (
+      <div style={{ padding: "24px", color: "#888", fontSize: 13 }}>
+        Memuat data kontrak...
+      </div>
+    );
+  }
 
   return (
     <div style={s.wrap}>
@@ -89,6 +136,18 @@ function Kontrak() {
 
         .tbl-row:hover { background: #F5F8FC; }
       `}</style>
+
+      {/* ── Modal Edit (muncul saat editItem tidak null) ── */}
+      {editItem && (
+        <KontrakEdit
+          kontrak={editItem}
+          onClose={() => setEditItem(null)}
+          onSaved={() => {
+            setEditItem(null);
+            getKontrak();
+          }}
+        />
+      )}
 
       <div style={s.card}>
         <div style={s.cardHead}>
@@ -126,7 +185,7 @@ function Kontrak() {
                         {index + 1}
                       </td>
                       <td style={s.td}>
-                        <span style={s.nomorBadge}>{item.nomorKontrak}</span>
+                        <span style={s.nomorBadge}>{item.nomor_kontrak}</span>
                       </td>
                       <td style={s.td}>
                         <span style={skemaBadgeStyle(item.skema)}>
@@ -134,36 +193,38 @@ function Kontrak() {
                         </span>
                       </td>
                       <td style={{ ...s.td, fontSize: 12.5 }}>
-                        {item.judulSkema}
+                        {item.judul_skema}
                       </td>
                       <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>
-                        {item.pihakKedua}
+                        {item.pihak_kedua}
                       </td>
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                        {formatTanggal(item.tanggalKontrak)}
+                        {formatTanggal(item.tanggal_kontrak)}
                       </td>
                       <td style={{ ...s.td, color: "#888", fontSize: 12 }}>
-                        {formatTanggal(item.tanggalBerakhir)}
+                        {formatTanggal(item.tanggal_berakhir)}
                       </td>
                       <td style={s.td}>
                         <button
                           className="btn-pdf"
-                          onClick={() => window.open(item.file, "_blank")}
+                          onClick={() => window.open(item.file_url, "_blank")}
                         >
                           Lihat PDF
                         </button>
                       </td>
                       <td style={s.td}>
+                        {/* Edit: tampil untuk semua role */}
                         <button
                           className="btn-edit"
-                          onClick={() => console.log("Edit:", item.id)}
+                          onClick={() => setEditItem(item)}
                         >
                           Edit
                         </button>
+                        {/* Hapus: hanya admin */}
                         {isAdmin && (
                           <button
                             className="btn-delete"
-                            onClick={() => console.log("Delete:", item.id)}
+                            onClick={() => handleDelete(item.id, item.file_url)}
                           >
                             Hapus
                           </button>

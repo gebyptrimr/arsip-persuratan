@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import React from "react";
 import Swal from "sweetalert2";
 import { supabase } from "../../lib/supabase";
 
 function InjectStyle() {
-  useEffect(() => {
+  React.useEffect(() => {
     const id = "sipas-btn-style";
     if (document.getElementById(id)) return;
     const tag = document.createElement("style");
@@ -43,13 +43,18 @@ function Field({ label, children, half, required }) {
   );
 }
 
-function SuratTugasTambah() {
-  const navigate = useNavigate();
-  const [fileName, setFileName] = useState("");
-  const [loading, setLoading] = useState(false);
+function SKEdit({ sk, onClose, onSaved }) {
+  const [fileName, setFileName] = useState(
+    sk?.file_url ? sk.file_url.split("/").pop() : ""
+  );
+  const [fileObj, setFileObj] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
-    nomorST: "", tanggalSurat: "", penerimaTugas: "",
-    tujuanTugas: "", tanggalMulai: "", tanggalSelesai: "", file: null,
+    nomorSK: sk?.nomor_sk || "",
+    judulSK: sk?.judul_sk || "",
+    jenisSK: sk?.jenis_sk || "",
+    tanggalSK: sk?.tanggal_sk || "",
+    pejabatPenetap: sk?.pejabat_penetap || "",
   });
 
   const handleChange = (e) => {
@@ -59,124 +64,110 @@ function SuratTugasTambah() {
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    setFileName(file?.name || "");
-    setFormData((prev) => ({ ...prev, file }));
+    if (file) { setFileName(file.name); setFileObj(file); }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSaving(true);
     try {
-      const file = formData.file;
-      const fileExt = file.name.split(".").pop();
-      const uploadName = `${Date.now()}_${formData.nomorST.replace(/\//g, "-")}.${fileExt}`;
+      let fileUrl = sk?.file_url || null;
 
-      const { error: uploadError } = await supabase.storage.from("surat-tugas").upload(uploadName, file);
-      if (uploadError) throw uploadError;
+      if (fileObj) {
+        if (sk?.file_url) {
+          const oldPath = sk.file_url.split("/surat-keputusan/")[1];
+          if (oldPath) await supabase.storage.from("surat-keputusan").remove([oldPath]);
+        }
+        const fileExt = fileObj.name.split(".").pop();
+        const newFileName = `${Date.now()}_${formData.nomorSK.replace(/\//g, "-")}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from("surat-keputusan").upload(newFileName, fileObj);
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from("surat-keputusan").getPublicUrl(newFileName);
+        fileUrl = urlData.publicUrl;
+      }
 
-      const { data: urlData } = supabase.storage.from("surat-tugas").getPublicUrl(uploadName);
+      const { error } = await supabase.from("surat_keputusan").update({
+        nomor_sk: formData.nomorSK,
+        judul_sk: formData.judulSK,
+        jenis_sk: formData.jenisSK,
+        tanggal_sk: formData.tanggalSK || null,
+        pejabat_penetap: formData.pejabatPenetap,
+        file_url: fileUrl,
+      }).eq("id", sk.id);
+      if (error) throw error;
 
-      const { error: insertError } = await supabase.from("surat_tugas").insert({
-        nomor_st: formData.nomorST,
-        tanggal_surat: formData.tanggalSurat || null,
-        penerima_tugas: formData.penerimaTugas,
-        tujuan_tugas: formData.tujuanTugas,
-        tanggal_mulai: formData.tanggalMulai || null,
-        tanggal_selesai: formData.tanggalSelesai || null,
-        file_url: urlData.publicUrl,
-      });
-      if (insertError) throw insertError;
-
-      await Swal.fire({ icon: "success", title: "Berhasil!", text: "Surat Tugas berhasil disimpan.", confirmButtonColor: "#1A3A5C", confirmButtonText: "Oke" });
-      navigate("/surat-tugas");
+      await Swal.fire({ icon: "success", title: "Berhasil!", text: "Data SK berhasil diperbarui.", confirmButtonColor: "#1A3A5C", confirmButtonText: "Oke" });
+      onSaved?.();
+      onClose?.();
     } catch (err) {
-      console.error(err);
       Swal.fire({ icon: "error", title: "Gagal!", text: err.message || "Terjadi kesalahan.", confirmButtonColor: "#1A3A5C" });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   return (
-    <div style={s.wrap}>
+    <div style={s.overlay}>
       <InjectStyle />
-      <div style={s.card}>
+      <div style={s.modal}>
+        {/* Header */}
         <div style={s.cardHead}>
           <div style={s.decCircle1} /><div style={s.decCircle2} />
           <div style={s.headIcon}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" strokeWidth="1.8">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" strokeWidth="1.8">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
             </svg>
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={s.cardTitle}>Tambah Surat Tugas</div>
-            <div style={s.cardSub}>Surat Tugas · LP2M Universitas Negeri Makassar</div>
+            <div style={s.cardTitle}>Edit Surat Keputusan</div>
+            <div style={s.cardSub}>Surat Keputusan · LP2M Universitas Negeri Makassar</div>
           </div>
           <div style={{ flex: 1 }} />
-          <div style={s.stepBadge}>
-            <div style={s.stepNum}>1</div>
-            <span style={s.stepText}>Isi Formulir</span>
+          <div onClick={onClose} style={s.closeBtn} title="Tutup">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </div>
         </div>
 
+        {/* Body */}
         <div style={s.cardBody}>
           <form onSubmit={handleSubmit}>
-            {/* Identitas */}
+            {/* Identitas SK */}
             <div style={s.sectionBlock}>
-              <div style={s.sectionHead}><div style={s.sectionDot} /><span style={s.sectionLabel}>Identitas Surat Tugas</span></div>
+              <div style={s.sectionHead}><div style={s.sectionDot} /><span style={s.sectionLabel}>Identitas SK</span></div>
               <div style={s.row}>
-                <Field label="Nomor Surat Tugas" half required>
-                  <div style={s.inputWrap}>
-                    <svg style={s.inputIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                    <input type="text" name="nomorST" value={formData.nomorST} onChange={handleChange} style={s.input} placeholder="Contoh: ST-001/2025" required />
-                  </div>
+                <Field label="Nomor SK" half required>
+                  <input type="text" name="nomorSK" value={formData.nomorSK} onChange={handleChange} style={s.input} placeholder="Contoh: SK-001/2025" required />
                 </Field>
-                <Field label="Tanggal Surat" half required>
-                  <div style={s.inputWrap}>
-                    <svg style={s.inputIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <input type="date" name="tanggalSurat" value={formData.tanggalSurat} onChange={handleChange} style={s.input} required />
+                <Field label="Judul SK" half required>
+                  <input type="text" name="judulSK" value={formData.judulSK} onChange={handleChange} style={s.input} placeholder="Masukkan judul SK" required />
+                </Field>
+              </div>
+              <div style={s.row}>
+                <Field label="Jenis SK" half required>
+                  <div style={s.selectWrap}>
+                    <select name="jenisSK" value={formData.jenisSK} onChange={handleChange} style={s.select} required>
+                      <option value="" disabled>-- Pilih Jenis SK --</option>
+                      <option value="Penelitian">Penelitian</option>
+                      <option value="Pengabdian">Pengabdian</option>
+                    </select>
+                    <svg style={s.chevron} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
                   </div>
                 </Field>
               </div>
             </div>
 
-            {/* Penugasan */}
+            {/* Detail */}
             <div style={s.sectionBlock}>
-              <div style={s.sectionHead}><div style={s.sectionDot} /><span style={s.sectionLabel}>Detail Penugasan</span></div>
+              <div style={s.sectionHead}><div style={s.sectionDot} /><span style={s.sectionLabel}>Detail Penetapan</span></div>
               <div style={s.row}>
-                <Field label="Penerima Tugas" half required>
-                  <div style={s.inputWrap}>
-                    <svg style={s.inputIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-                    <input type="text" name="penerimaTugas" value={formData.penerimaTugas} onChange={handleChange} style={s.input} placeholder="Nama penerima tugas" required />
-                  </div>
+                <Field label="Tanggal SK" half>
+                  <input type="date" name="tanggalSK" value={formData.tanggalSK} onChange={handleChange} style={s.input} />
                 </Field>
-                <Field label="Tujuan Tugas" half required>
-                  <div style={s.inputWrap}>
-                    <svg style={s.inputIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <input type="text" name="tujuanTugas" value={formData.tujuanTugas} onChange={handleChange} style={s.input} placeholder="Tujuan / keperluan tugas" required />
-                  </div>
-                </Field>
-              </div>
-            </div>
-
-            {/* Periode */}
-            <div style={s.sectionBlock}>
-              <div style={s.sectionHead}><div style={s.sectionDot} /><span style={s.sectionLabel}>Periode Pelaksanaan</span></div>
-              <div style={s.row}>
-                <Field label="Tanggal Mulai" half required>
-                  <div style={s.inputWrap}>
-                    <svg style={s.inputIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <input type="date" name="tanggalMulai" value={formData.tanggalMulai} onChange={handleChange} style={s.input} required />
-                  </div>
-                </Field>
-                <Field label="Tanggal Selesai" half required>
-                  <div style={s.inputWrap}>
-                    <svg style={s.inputIcon} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                    <input type="date" name="tanggalSelesai" value={formData.tanggalSelesai} onChange={handleChange} style={s.input} required />
-                  </div>
+                <Field label="Pejabat Penetap" half>
+                  <input type="text" name="pejabatPenetap" value={formData.pejabatPenetap} onChange={handleChange} style={s.input} placeholder="Nama pejabat yang menetapkan" />
                 </Field>
               </div>
             </div>
@@ -184,14 +175,14 @@ function SuratTugasTambah() {
             {/* Dokumen */}
             <div style={s.sectionBlock}>
               <div style={s.sectionHead}><div style={s.sectionDot} /><span style={s.sectionLabel}>Dokumen</span></div>
-              <Field label="Upload File PDF" required>
+              <Field label="Upload File PDF (kosongkan jika tidak ingin mengganti file)">
                 <label style={s.uploadBox}>
-                  <input type="file" accept=".pdf" required style={{ display: "none" }} onChange={handleFileChange} />
+                  <input type="file" accept=".pdf" style={{ display: "none" }} onChange={handleFileChange} />
                   {fileName ? (
                     <div style={s.filePreview}>
                       <div style={s.filePill}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" strokeWidth="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span style={{ fontSize: 12.5, color: "#1A3A5C", fontWeight: 600, maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fileName}</span>
+                        <span style={{ fontSize: 12.5, color: "#1A3A5C", fontWeight: 600, maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fileName}</span>
                       </div>
                       <span style={{ fontSize: 11, color: "#888" }}>Klik untuk ganti file</span>
                     </div>
@@ -212,13 +203,13 @@ function SuratTugasTambah() {
 
             {/* Actions */}
             <div style={s.actionBar}>
-              <SipasButton type="button" baseStyle={s.btnBatal} onClick={() => navigate("/surat-tugas")}>
+              <SipasButton type="button" baseStyle={s.btnBatal} onClick={onClose}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6 }}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 Batal
               </SipasButton>
-              <SipasButton type="submit" baseStyle={s.btnSimpan} disabled={loading}>
+              <SipasButton type="submit" baseStyle={s.btnSimpan} disabled={saving}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6 }}><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                {loading ? "Menyimpan..." : "Simpan Surat Tugas"}
+                {saving ? "Menyimpan..." : "Simpan Perubahan"}
               </SipasButton>
             </div>
           </form>
@@ -229,17 +220,15 @@ function SuratTugasTambah() {
 }
 
 const s = {
-  wrap: { backgroundColor: "#F5F7FA", minHeight: "100vh", padding: "24px", fontFamily: "'Inter', sans-serif" },
-  card: { backgroundColor: "#fff", borderRadius: 14, border: "0.5px solid #e0e0e0", overflow: "hidden" },
+  overlay: { position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 },
+  modal: { backgroundColor: "#fff", borderRadius: 14, border: "0.5px solid #e0e0e0", overflow: "hidden", width: "100%", maxWidth: 720, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.25)" },
   cardHead: { backgroundColor: "#1A3A5C", padding: "20px 26px", display: "flex", alignItems: "center", gap: 14, position: "relative", overflow: "hidden" },
   decCircle1: { position: "absolute", width: 160, height: 160, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.06)", top: -60, right: 120, pointerEvents: "none" },
   decCircle2: { position: "absolute", width: 100, height: 100, borderRadius: "50%", backgroundColor: "rgba(74,159,213,0.08)", bottom: -30, right: 60, pointerEvents: "none" },
   headIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative", zIndex: 1 },
   cardTitle: { color: "#fff", fontSize: 15, fontWeight: 700, lineHeight: 1.3, position: "relative", zIndex: 1 },
   cardSub: { color: "rgba(255,255,255,0.45)", fontSize: 11, marginTop: 3, position: "relative", zIndex: 1 },
-  stepBadge: { display: "flex", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: "5px 12px", position: "relative", zIndex: 1 },
-  stepNum: { width: 18, height: 18, borderRadius: "50%", backgroundColor: "#4A9FD5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#fff" },
-  stepText: { fontSize: 11, color: "rgba(255,255,255,0.8)", fontWeight: 500 },
+  closeBtn: { width: 32, height: 32, borderRadius: 8, backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, position: "relative", zIndex: 1 },
   cardBody: { padding: "28px 28px 24px" },
   sectionBlock: { marginBottom: 24 },
   sectionHead: { display: "flex", alignItems: "center", gap: 8, marginBottom: 14 },
@@ -249,9 +238,10 @@ const s = {
   fieldWrap: { display: "flex", flexDirection: "column", marginBottom: 14 },
   label: { fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 6, letterSpacing: 0.1, display: "flex", alignItems: "center", gap: 4 },
   requiredDot: { color: "#E24B4A", fontSize: 13, lineHeight: 1 },
-  inputWrap: { position: "relative", display: "flex", alignItems: "center" },
-  inputIcon: { position: "absolute", left: 10, pointerEvents: "none", flexShrink: 0 },
-  input: { width: "100%", padding: "9px 12px 9px 32px", border: "0.5px solid #D1D5DB", borderRadius: 8, fontSize: 13, outline: "none", backgroundColor: "#FAFAFA", color: "#1A1A1A", boxSizing: "border-box" },
+  input: { padding: "9px 12px", border: "0.5px solid #D1D5DB", borderRadius: 8, fontSize: 13, outline: "none", backgroundColor: "#FAFAFA", color: "#1A1A1A", width: "100%", boxSizing: "border-box" },
+  selectWrap: { position: "relative", width: "100%" },
+  select: { width: "100%", padding: "9px 36px 9px 12px", border: "0.5px solid #D1D5DB", borderRadius: 8, fontSize: 13, outline: "none", backgroundColor: "#FAFAFA", color: "#1A1A1A", boxSizing: "border-box", appearance: "none", WebkitAppearance: "none", cursor: "pointer" },
+  chevron: { position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" },
   uploadBox: { display: "flex", alignItems: "center", justifyContent: "center", padding: "22px 24px", border: "1.5px dashed #B8D4EE", borderRadius: 10, backgroundColor: "#F4F9FD", cursor: "pointer" },
   uploadInner: { display: "flex", alignItems: "center", gap: 16 },
   uploadIconWrap: { width: 52, height: 52, borderRadius: 12, backgroundColor: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
@@ -262,4 +252,4 @@ const s = {
   btnSimpan: { display: "inline-flex", alignItems: "center", background: "#1A3A5C", color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", fontSize: 13, fontWeight: 600, userSelect: "none" },
 };
 
-export default SuratTugasTambah;
+export default SKEdit;

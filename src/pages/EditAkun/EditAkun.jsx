@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
-import "./TambahAkun.css";
+import "../TambahAkun/TambahAkun.css";
 
 const jabatanOptions = ["Administrator", "Staff"];
 
@@ -16,21 +16,47 @@ const hakAksesByJabatan = {
   ],
 };
 
-export default function TambahAkun() {
+export default function EditAkun() {
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const [form, setForm] = useState({
     nama: "",
     email: "",
+    jabatan: "",
     password: "",
     konfirmasiPassword: "",
-    jabatan: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [showKonfirmasi, setShowKonfirmasi] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
+
+  // Fetch data user berdasarkan id
+  useEffect(() => {
+    async function fetchUser() {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("nama, email, jabatan")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        console.error("Gagal fetch user:", error.message);
+      } else {
+        setForm((prev) => ({
+          ...prev,
+          nama: data.nama || "",
+          email: data.email || "",
+          jabatan: data.jabatan || "",
+        }));
+      }
+      setFetching(false);
+    }
+    fetchUser();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,14 +70,12 @@ export default function TambahAkun() {
     if (!form.email.trim()) newErrors.email = "Email wajib diisi.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       newErrors.email = "Format email tidak valid.";
-    if (!form.password) newErrors.password = "Password wajib diisi.";
-    else if (form.password.length < 8)
-      newErrors.password = "Password minimal 8 karakter.";
-    if (!form.konfirmasiPassword)
-      newErrors.konfirmasiPassword = "Konfirmasi password wajib diisi.";
-    else if (form.password !== form.konfirmasiPassword)
-      newErrors.konfirmasiPassword = "Password tidak cocok.";
     if (!form.jabatan) newErrors.jabatan = "Jabatan wajib dipilih.";
+    // Password opsional saat edit — hanya validasi kalau diisi
+    if (form.password && form.password.length < 8)
+      newErrors.password = "Password minimal 8 karakter.";
+    if (form.password && form.password !== form.konfirmasiPassword)
+      newErrors.konfirmasiPassword = "Password tidak cocok.";
     return newErrors;
   };
 
@@ -63,36 +87,49 @@ export default function TambahAkun() {
     }
 
     setLoading(true);
-
     try {
-      const { data, error } = await supabase.functions.invoke("create-user", {
-        body: {
-          nama:      form.nama.trim(),
-          email:     form.email.trim().toLowerCase(),
-          password:  form.password,
-          jabatan:   form.jabatan,
-          role:      form.jabatan === "Administrator" ? "admin" : "staf",
+      // Update profiles
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          nama: form.nama.trim(),
+          email: form.email.trim().toLowerCase(),
+          jabatan: form.jabatan,
+          role: form.jabatan === "Administrator" ? "admin" : "staf",
           hak_akses: hakAksesByJabatan[form.jabatan],
-          status:    "Aktif",
-        },
-      });
+        })
+        .eq("id", id);
 
-      if (error || data?.error) {
-        const message = data?.error || error.message || "Gagal menyimpan akun.";
-        setErrors(message.toLowerCase().includes("email")
-          ? { email: message }
-          : { submit: message });
+      if (profileError) {
+        setErrors({ submit: profileError.message });
         return;
+      }
+
+      // Update password kalau diisi
+      if (form.password) {
+        const { error: pwError } = await supabase.functions.invoke("update-password", {
+          body: { user_id: id, password: form.password },
+        });
+        if (pwError) {
+          setErrors({ submit: "Profil tersimpan tapi gagal update password." });
+          return;
+        }
       }
 
       navigate("/users");
     } catch (err) {
-      console.error("Gagal menyimpan akun:", err);
-      setErrors({ submit: "Gagal menyimpan akun. Coba lagi." });
+      console.error("Gagal update akun:", err);
+      setErrors({ submit: "Gagal update akun. Coba lagi." });
     } finally {
       setLoading(false);
     }
   };
+
+  if (fetching) return (
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+      <p style={{ color: "#94a3b8" }}>Memuat data...</p>
+    </div>
+  );
 
   return (
     <div className="ta-wrapper">
@@ -113,10 +150,10 @@ export default function TambahAkun() {
         </div>
 
         <div className="ta-left-content">
-          <h2>Buat Akun Staf Baru</h2>
-          <p>Tambahkan akun untuk administrator atau staf yang akan mengelola arsip surat di SIPAS.</p>
+          <h2>Edit Akun Staf</h2>
+          <p>Perbarui informasi akun staf yang sudah terdaftar di SIPAS.</p>
           <div className="ta-steps">
-            {["Isi informasi akun", "Tentukan jabatan", "Simpan & aktifkan"].map((s, i) => (
+            {["Perbarui informasi", "Ubah jabatan", "Simpan perubahan"].map((s, i) => (
               <div className="ta-step" key={i}>
                 <div className={`ta-step-num ${i === 0 ? "active" : ""}`}>{i + 1}</div>
                 <span>{s}</span>
@@ -139,8 +176,8 @@ export default function TambahAkun() {
               Kembali
             </button>
             <div className="ta-form-title">
-              <h1>Tambah Akun</h1>
-              <p>Lengkapi semua field di bawah ini</p>
+              <h1>Edit Akun</h1>
+              <p>Kosongkan password jika tidak ingin mengubahnya</p>
             </div>
           </div>
 
@@ -153,7 +190,7 @@ export default function TambahAkun() {
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
                   <circle cx="12" cy="7" r="4" stroke="#94a3b8" strokeWidth="2"/>
                 </svg>
-                <input type="text" name="nama" placeholder="Contoh: Admin LP2M" value={form.nama} onChange={handleChange}/>
+                <input type="text" name="nama" placeholder="Nama lengkap" value={form.nama} onChange={handleChange}/>
               </div>
               {errors.nama && <p className="ta-err">{errors.nama}</p>}
             </div>
@@ -166,7 +203,7 @@ export default function TambahAkun() {
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="#94a3b8" strokeWidth="2"/>
                   <polyline points="22,6 12,13 2,6" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
                 </svg>
-                <input type="email" name="email" placeholder="Contoh: staf@lp2m.unm.ac.id" value={form.email} onChange={handleChange}/>
+                <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange}/>
               </div>
               {errors.email && <p className="ta-err">{errors.email}</p>}
             </div>
@@ -192,9 +229,9 @@ export default function TambahAkun() {
               {errors.jabatan && <p className="ta-err">{errors.jabatan}</p>}
             </div>
 
-            {/* PASSWORD */}
+            {/* PASSWORD BARU (opsional) */}
             <div className={`ta-group ${errors.password ? "has-error" : ""}`}>
-              <label>Password <span className="req">*</span></label>
+              <label>Password Baru <span style={{ color: "#94a3b8", fontWeight: 400 }}>(opsional)</span></label>
               <div className="ta-input-wrap">
                 <svg className="ta-ico" width="16" height="16" viewBox="0 0 24 24" fill="none">
                   <rect x="3" y="11" width="18" height="11" rx="2" stroke="#94a3b8" strokeWidth="2"/>
@@ -202,7 +239,7 @@ export default function TambahAkun() {
                 </svg>
                 <input
                   type={showPassword ? "text" : "password"}
-                  name="password" placeholder="Minimal 8 karakter"
+                  name="password" placeholder="Kosongkan jika tidak diubah"
                   value={form.password} onChange={handleChange}
                 />
                 <button type="button" className="ta-toggle-pw" onClick={() => setShowPassword((v) => !v)}>
@@ -216,27 +253,29 @@ export default function TambahAkun() {
             </div>
 
             {/* KONFIRMASI PASSWORD */}
-            <div className={`ta-group ${errors.konfirmasiPassword ? "has-error" : ""}`}>
-              <label>Konfirmasi Password <span className="req">*</span></label>
-              <div className="ta-input-wrap">
-                <svg className="ta-ico" width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="#94a3b8" strokeWidth="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <input
-                  type={showKonfirmasi ? "text" : "password"}
-                  name="konfirmasiPassword" placeholder="Ulangi password"
-                  value={form.konfirmasiPassword} onChange={handleChange}
-                />
-                <button type="button" className="ta-toggle-pw" onClick={() => setShowKonfirmasi((v) => !v)}>
-                  {showKonfirmasi
-                    ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/></svg>
-                    : <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="3" stroke="#94a3b8" strokeWidth="2"/></svg>
-                  }
-                </button>
+            {form.password && (
+              <div className={`ta-group ${errors.konfirmasiPassword ? "has-error" : ""}`}>
+                <label>Konfirmasi Password <span className="req">*</span></label>
+                <div className="ta-input-wrap">
+                  <svg className="ta-ico" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="11" width="18" height="11" rx="2" stroke="#94a3b8" strokeWidth="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  <input
+                    type={showKonfirmasi ? "text" : "password"}
+                    name="konfirmasiPassword" placeholder="Ulangi password baru"
+                    value={form.konfirmasiPassword} onChange={handleChange}
+                  />
+                  <button type="button" className="ta-toggle-pw" onClick={() => setShowKonfirmasi((v) => !v)}>
+                    {showKonfirmasi
+                      ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/><line x1="1" y1="1" x2="23" y2="23" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/></svg>
+                      : <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="12" r="3" stroke="#94a3b8" strokeWidth="2"/></svg>
+                    }
+                  </button>
+                </div>
+                {errors.konfirmasiPassword && <p className="ta-err">{errors.konfirmasiPassword}</p>}
               </div>
-              {errors.konfirmasiPassword && <p className="ta-err">{errors.konfirmasiPassword}</p>}
-            </div>
+            )}
 
             {errors.submit && <p className="ta-err">{errors.submit}</p>}
           </div>
@@ -247,7 +286,7 @@ export default function TambahAkun() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                 <polyline points="20 6 9 17 4 12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              {loading ? "Menyimpan..." : "Simpan Akun"}
+              {loading ? "Menyimpan..." : "Simpan Perubahan"}
             </button>
           </div>
         </div>

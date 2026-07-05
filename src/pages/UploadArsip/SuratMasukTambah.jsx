@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { supabase } from "../../lib/supabase";
 
 function InjectStyle() {
   useEffect(() => {
@@ -23,31 +25,27 @@ function InjectStyle() {
   return null;
 }
 
-function SipasButton({ type = "button", baseStyle, onClick, children }) {
+function SipasButton({ type = "button", baseStyle, onClick, disabled, children }) {
   const [pressed, setPressed] = React.useState(false);
-  const [hovered, setHovered] = React.useState(false);
   return (
     <button
       type={type}
       className="sipas-btn"
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => {
-        setHovered(false);
-        setPressed(false);
-      }}
+      disabled={disabled}
       onMouseDown={() => setPressed(true)}
       onMouseUp={() => setPressed(false)}
+      onMouseLeave={() => setPressed(false)}
       onTouchStart={() => setPressed(true)}
       onTouchEnd={() => setPressed(false)}
       style={{
         ...baseStyle,
-        opacity: pressed ? 0.85 : 1,
+        opacity: disabled ? 0.6 : pressed ? 0.85 : 1,
         transform: pressed ? "scale(0.985)" : "scale(1)",
         transition: "opacity 0.08s, transform 0.08s",
-        // Force background and color to always use baseStyle values
         backgroundColor: baseStyle.background,
         color: baseStyle.color,
+        cursor: disabled ? "not-allowed" : "pointer",
       }}
     >
       {children}
@@ -55,7 +53,6 @@ function SipasButton({ type = "button", baseStyle, onClick, children }) {
   );
 }
 
-// ─── Field Component ──────────────────────────────────────────
 function Field({ label, children, half, required }) {
   return (
     <div style={{ ...s.fieldWrap, width: half ? "calc(50% - 8px)" : "100%" }}>
@@ -68,9 +65,10 @@ function Field({ label, children, half, required }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────
 function SuratMasukTambah() {
+  const navigate = useNavigate();
   const [fileName, setFileName] = useState("");
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     nomorSurat: "",
     tanggalSurat: "",
@@ -91,35 +89,76 @@ function SuratMasukTambah() {
     setFormData((prev) => ({ ...prev, file }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    Swal.fire({
-      icon: "success",
-      title: "Berhasil!",
-      text: "Data Surat Masuk berhasil disimpan.",
-      confirmButtonColor: "#1A3A5C",
-      confirmButtonText: "Oke",
-    });
+    setLoading(true);
+
+    try {
+      // 1. Upload file PDF ke Supabase Storage
+      const file = formData.file;
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}_${formData.nomorSurat.replace(/\//g, "-")}.${fileExt}`;
+      const filePath = fileName;
+
+      const { error: uploadError } = await supabase.storage
+        .from("surat-masuk")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Ambil public URL
+      const { data: urlData } = supabase.storage
+        .from("surat-masuk")
+        .getPublicUrl(filePath);
+
+      const fileUrl = urlData.publicUrl;
+
+      // 3. Simpan data ke tabel surat_masuk
+      const { error: insertError } = await supabase
+        .from("surat_masuk")
+        .insert({
+          nomor_surat: formData.nomorSurat,
+          tanggal_surat: formData.tanggalSurat,
+          tanggal_terima: formData.tanggalTerima,
+          pengirim: formData.pengirim,
+          perihal: formData.perihal,
+          file_url: fileUrl,
+        });
+
+      if (insertError) throw insertError;
+
+      await Swal.fire({
+        icon: "success",
+        title: "Berhasil!",
+        text: "Surat Masuk berhasil disimpan.",
+        confirmButtonColor: "#1A3A5C",
+        confirmButtonText: "Oke",
+      });
+
+      navigate("/surat-masuk");
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: err.message || "Terjadi kesalahan saat menyimpan.",
+        confirmButtonColor: "#1A3A5C",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={s.wrap}>
       <InjectStyle />
       <div style={s.card}>
-        {/* ── Header ── */}
+        {/* Header */}
         <div style={s.cardHead}>
           <div style={s.decCircle1} />
           <div style={s.decCircle2} />
           <div style={s.headIcon}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#4A9FD5"
-              strokeWidth="1.8"
-            >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" strokeWidth="1.8">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
               <polyline points="14 2 14 8 20 8" />
               <line x1="16" y1="13" x2="8" y2="13" />
@@ -128,9 +167,7 @@ function SuratMasukTambah() {
           </div>
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={s.cardTitle}>Tambah Surat Masuk</div>
-            <div style={s.cardSub}>
-              Surat Masuk · LP2M Universitas Negeri Makassar
-            </div>
+            <div style={s.cardSub}>Surat Masuk · LP2M Universitas Negeri Makassar</div>
           </div>
           <div style={{ flex: 1 }} />
           <div style={s.stepBadge}>
@@ -139,7 +176,7 @@ function SuratMasukTambah() {
           </div>
         </div>
 
-        {/* ── Body ── */}
+        {/* Body */}
         <div style={s.cardBody}>
           <form onSubmit={handleSubmit}>
             {/* Identitas Surat */}
@@ -150,37 +187,15 @@ function SuratMasukTambah() {
               </div>
               <div style={s.row}>
                 <Field label="Nomor Surat" half required>
-                  <input
-                    type="text"
-                    name="nomorSurat"
-                    value={formData.nomorSurat}
-                    onChange={handleChange}
-                    style={s.input}
-                    placeholder="Contoh: 001/SM/2025"
-                    required
-                  />
+                  <input type="text" name="nomorSurat" value={formData.nomorSurat} onChange={handleChange} style={s.input} placeholder="Contoh: 001/SM/2025" required />
                 </Field>
                 <Field label="Tanggal Surat" half required>
-                  <input
-                    type="date"
-                    name="tanggalSurat"
-                    value={formData.tanggalSurat}
-                    onChange={handleChange}
-                    style={s.input}
-                    required
-                  />
+                  <input type="date" name="tanggalSurat" value={formData.tanggalSurat} onChange={handleChange} style={s.input} required />
                 </Field>
               </div>
               <div style={s.row}>
                 <Field label="Tanggal Diterima" half required>
-                  <input
-                    type="date"
-                    name="tanggalTerima"
-                    value={formData.tanggalTerima}
-                    onChange={handleChange}
-                    style={s.input}
-                    required
-                  />
+                  <input type="date" name="tanggalTerima" value={formData.tanggalTerima} onChange={handleChange} style={s.input} required />
                 </Field>
               </div>
             </div>
@@ -193,26 +208,10 @@ function SuratMasukTambah() {
               </div>
               <div style={s.row}>
                 <Field label="Pengirim" half required>
-                  <input
-                    type="text"
-                    name="pengirim"
-                    value={formData.pengirim}
-                    onChange={handleChange}
-                    style={s.input}
-                    placeholder="Nama Pengirim"
-                    required
-                  />
+                  <input type="text" name="pengirim" value={formData.pengirim} onChange={handleChange} style={s.input} placeholder="Nama Pengirim" required />
                 </Field>
                 <Field label="Perihal" half required>
-                  <input
-                    type="text"
-                    name="perihal"
-                    value={formData.perihal}
-                    onChange={handleChange}
-                    style={s.input}
-                    placeholder="Perihal Surat"
-                    required
-                  />
+                  <input type="text" name="perihal" value={formData.perihal} onChange={handleChange} style={s.input} placeholder="Perihal Surat" required />
                 </Field>
               </div>
             </div>
@@ -225,80 +224,32 @@ function SuratMasukTambah() {
               </div>
               <Field label="Upload File PDF" required>
                 <label style={s.uploadBox}>
-                  <input
-                    type="file"
-                    accept=".pdf"
-                    required
-                    style={{ display: "none" }}
-                    onChange={handleFileChange}
-                  />
+                  <input type="file" accept=".pdf" required style={{ display: "none" }} onChange={handleFileChange} />
                   {fileName ? (
                     <div style={s.filePreview}>
                       <div style={s.filePill}>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#A32D2D"
-                          strokeWidth="2"
-                        >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" strokeWidth="2">
                           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                           <polyline points="14 2 14 8 20 8" />
                         </svg>
-                        <span
-                          style={{
-                            fontSize: 12.5,
-                            color: "#1A3A5C",
-                            fontWeight: 600,
-                            maxWidth: 320,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
+                        <span style={{ fontSize: 12.5, color: "#1A3A5C", fontWeight: 600, maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {fileName}
                         </span>
                       </div>
-                      <span style={{ fontSize: 11, color: "#888" }}>
-                        Klik untuk ganti file
-                      </span>
+                      <span style={{ fontSize: 11, color: "#888" }}>Klik untuk ganti file</span>
                     </div>
                   ) : (
                     <div style={s.uploadInner}>
                       <div style={s.uploadIconWrap}>
-                        <svg
-                          width="26"
-                          height="26"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#4A9FD5"
-                          strokeWidth="1.6"
-                        >
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4A9FD5" strokeWidth="1.6">
                           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                           <polyline points="17 8 12 3 7 8" />
                           <line x1="12" y1="3" x2="12" y2="15" />
                         </svg>
                       </div>
                       <div>
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: "#1A3A5C",
-                          }}
-                        >
-                          Klik untuk memilih file PDF
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 11.5,
-                            color: "#aaa",
-                            marginTop: 3,
-                          }}
-                        >
-                          Format yang diterima: .pdf · Maks. 10 MB
-                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: "#1A3A5C" }}>Klik untuk memilih file PDF</div>
+                        <div style={{ fontSize: 11.5, color: "#aaa", marginTop: 3 }}>Format yang diterima: .pdf · Maks. 10 MB</div>
                       </div>
                     </div>
                   )}
@@ -308,40 +259,20 @@ function SuratMasukTambah() {
 
             {/* Actions */}
             <div style={s.actionBar}>
-              <SipasButton
-                type="button"
-                baseStyle={s.btnBatal}
-                onClick={() => console.log("Batal")}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  style={{ marginRight: 6 }}
-                >
+              <SipasButton type="button" baseStyle={s.btnBatal} onClick={() => navigate("/surat-masuk")}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6 }}>
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
                 Batal
               </SipasButton>
-              <SipasButton type="submit" baseStyle={s.btnSimpan}>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  style={{ marginRight: 6 }}
-                >
+              <SipasButton type="submit" baseStyle={s.btnSimpan} disabled={loading}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ marginRight: 6 }}>
                   <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
                   <polyline points="17 21 17 13 7 13 7 21" />
                   <polyline points="7 3 7 8 15 8" />
                 </svg>
-                Simpan Surat Masuk
+                {loading ? "Menyimpan..." : "Simpan Surat Masuk"}
               </SipasButton>
             </div>
           </form>
@@ -351,225 +282,36 @@ function SuratMasukTambah() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────
 const s = {
-  wrap: {
-    backgroundColor: "#F5F7FA",
-    minHeight: "100vh",
-    padding: "24px",
-    fontFamily: "'Inter', sans-serif",
-  },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    overflow: "hidden",
-    border: "0.5px solid #e0e0e0",
-  },
-  cardHead: {
-    backgroundColor: "#1A3A5C",
-    padding: "20px 26px",
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
-    position: "relative",
-    overflow: "hidden",
-  },
-  decCircle1: {
-    position: "absolute",
-    width: 160,
-    height: 160,
-    borderRadius: "50%",
-    border: "1px solid rgba(255,255,255,0.06)",
-    top: -60,
-    right: 120,
-    pointerEvents: "none",
-  },
-  decCircle2: {
-    position: "absolute",
-    width: 100,
-    height: 100,
-    borderRadius: "50%",
-    backgroundColor: "rgba(74,159,213,0.08)",
-    bottom: -30,
-    right: 60,
-    pointerEvents: "none",
-  },
-  headIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    border: "1px solid rgba(255,255,255,0.12)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    position: "relative",
-    zIndex: 1,
-  },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 15,
-    fontWeight: 700,
-    lineHeight: 1.3,
-    position: "relative",
-    zIndex: 1,
-  },
-  cardSub: {
-    color: "rgba(255,255,255,0.45)",
-    fontSize: 11,
-    marginTop: 3,
-    position: "relative",
-    zIndex: 1,
-  },
-  stepBadge: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    border: "1px solid rgba(255,255,255,0.15)",
-    borderRadius: 20,
-    padding: "5px 12px",
-    position: "relative",
-    zIndex: 1,
-  },
-  stepNum: {
-    width: 18,
-    height: 18,
-    borderRadius: "50%",
-    backgroundColor: "#4A9FD5",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: 10,
-    fontWeight: 700,
-    color: "#fff",
-  },
+  wrap: { backgroundColor: "#F5F7FA", minHeight: "100vh", padding: "24px", fontFamily: "'Inter', sans-serif" },
+  card: { backgroundColor: "#fff", borderRadius: 14, overflow: "hidden", border: "0.5px solid #e0e0e0" },
+  cardHead: { backgroundColor: "#1A3A5C", padding: "20px 26px", display: "flex", alignItems: "center", gap: 14, position: "relative", overflow: "hidden" },
+  decCircle1: { position: "absolute", width: 160, height: 160, borderRadius: "50%", border: "1px solid rgba(255,255,255,0.06)", top: -60, right: 120, pointerEvents: "none" },
+  decCircle2: { position: "absolute", width: 100, height: 100, borderRadius: "50%", backgroundColor: "rgba(74,159,213,0.08)", bottom: -30, right: 60, pointerEvents: "none" },
+  headIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative", zIndex: 1 },
+  cardTitle: { color: "#fff", fontSize: 15, fontWeight: 700, lineHeight: 1.3, position: "relative", zIndex: 1 },
+  cardSub: { color: "rgba(255,255,255,0.45)", fontSize: 11, marginTop: 3, position: "relative", zIndex: 1 },
+  stepBadge: { display: "flex", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: "5px 12px", position: "relative", zIndex: 1 },
+  stepNum: { width: 18, height: 18, borderRadius: "50%", backgroundColor: "#4A9FD5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#fff" },
   stepText: { fontSize: 11, color: "rgba(255,255,255,0.8)", fontWeight: 500 },
   cardBody: { padding: "28px 28px 24px" },
-
   sectionBlock: { marginBottom: 24 },
-  sectionHead: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 14,
-  },
-  sectionDot: {
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    backgroundColor: "#4A9FD5",
-    flexShrink: 0,
-  },
-  sectionLabel: {
-    fontSize: 10.5,
-    fontWeight: 700,
-    color: "#4A9FD5",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    paddingBottom: 6,
-    borderBottom: "1.5px solid #EAF3FB",
-    flex: 1,
-  },
-
+  sectionHead: { display: "flex", alignItems: "center", gap: 8, marginBottom: 14 },
+  sectionDot: { width: 8, height: 8, borderRadius: "50%", backgroundColor: "#4A9FD5", flexShrink: 0 },
+  sectionLabel: { fontSize: 10.5, fontWeight: 700, color: "#4A9FD5", textTransform: "uppercase", letterSpacing: 1.2, paddingBottom: 6, borderBottom: "1.5px solid #EAF3FB", flex: 1 },
   row: { display: "flex", gap: 16, flexWrap: "wrap" },
   fieldWrap: { display: "flex", flexDirection: "column", marginBottom: 14 },
-  label: {
-    fontSize: 12,
-    fontWeight: 600,
-    marginBottom: 6,
-    color: "#374151",
-    letterSpacing: 0.1,
-  },
+  label: { fontSize: 12, fontWeight: 600, marginBottom: 6, color: "#374151", letterSpacing: 0.1 },
   requiredDot: { color: "#E24B4A", marginLeft: 2 },
-  input: {
-    width: "100%",
-    padding: "9px 12px",
-    border: "0.5px solid #D1D5DB",
-    borderRadius: 8,
-    fontSize: 13,
-    outline: "none",
-    backgroundColor: "#FAFAFA",
-    color: "#1A1A1A",
-    boxSizing: "border-box",
-    transition: "border .15s",
-  },
-
-  uploadBox: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "22px 24px",
-    border: "1.5px dashed #B8D4EE",
-    borderRadius: 10,
-    backgroundColor: "#F4F9FD",
-    cursor: "pointer",
-    transition: "background .15s",
-  },
+  input: { width: "100%", padding: "9px 12px", border: "0.5px solid #D1D5DB", borderRadius: 8, fontSize: 13, outline: "none", backgroundColor: "#FAFAFA", color: "#1A1A1A", boxSizing: "border-box", transition: "border .15s" },
+  uploadBox: { display: "flex", alignItems: "center", justifyContent: "center", padding: "22px 24px", border: "1.5px dashed #B8D4EE", borderRadius: 10, backgroundColor: "#F4F9FD", cursor: "pointer", transition: "background .15s" },
   uploadInner: { display: "flex", alignItems: "center", gap: 16 },
-  uploadIconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 12,
-    backgroundColor: "#E6F1FB",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  filePreview: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 6,
-  },
-  filePill: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#FEF2F2",
-    border: "1px solid #FECACA",
-    borderRadius: 8,
-    padding: "7px 14px",
-  },
-
-  actionBar: {
-    display: "flex",
-    justifyContent: "flex-end",
-    gap: 10,
-    borderTop: "1px solid #F0F0F0",
-    paddingTop: 20,
-    marginTop: 8,
-  },
-  btnBatal: {
-    display: "inline-flex",
-    alignItems: "center",
-    background: "#F3F4F6",
-    color: "#374151",
-    border: "none",
-    borderRadius: 8,
-    padding: "9px 18px",
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    userSelect: "none",
-    WebkitTapHighlightColor: "transparent",
-  },
-  btnSimpan: {
-    display: "inline-flex",
-    alignItems: "center",
-    background: "#1A3A5C",
-    color: "#fff",
-    border: "none",
-    borderRadius: 8,
-    padding: "9px 22px",
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    userSelect: "none",
-    WebkitTapHighlightColor: "transparent",
-  },
+  uploadIconWrap: { width: 52, height: 52, borderRadius: 12, backgroundColor: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
+  filePreview: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6 },
+  filePill: { display: "flex", alignItems: "center", gap: 8, backgroundColor: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "7px 14px" },
+  actionBar: { display: "flex", justifyContent: "flex-end", gap: 10, borderTop: "1px solid #F0F0F0", paddingTop: 20, marginTop: 8 },
+  btnBatal: { display: "inline-flex", alignItems: "center", background: "#F3F4F6", color: "#374151", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 600, userSelect: "none" },
+  btnSimpan: { display: "inline-flex", alignItems: "center", background: "#1A3A5C", color: "#fff", border: "none", borderRadius: 8, padding: "9px 22px", fontSize: 13, fontWeight: 600, userSelect: "none" },
 };
 
 export default SuratMasukTambah;

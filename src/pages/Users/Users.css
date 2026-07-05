@@ -270,24 +270,9 @@
   color: #1d4ed8;
 }
 
-.jabatan-staff-arsip {
+.jabatan-staff {
   background: #dcfce7;
   color: #15803d;
-}
-
-.jabatan-dokumentasi {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
-.jabatan-persuratan {
-  background: #ffedd5;
-  color: #c2410c;
-}
-
-.jabatan-staff-tugas {
-  background: #cffafe;
-  color: #0e7490;
 }
 
 /* =========================
@@ -311,8 +296,8 @@
 }
 
 .status-inactive {
-  background: #fee2e2;
-  color: #dc2626;
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
 }
 
 /* =========================
@@ -596,17 +581,6 @@
   white-space: nowrap;
 }
 
-.btn-reset {
-  border: 1.5px solid #e2e8f0;
-  background: white;
-  color: #475569;
-}
-
-.btn-reset:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-}
-
 .btn-edit {
   border: none;
   background: #163b67;
@@ -625,6 +599,16 @@
 
 .btn-nonaktif:hover {
   background: #fee2e2;
+}
+
+.btn-aktifkan {
+  border: 1.5px solid #86efac;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.btn-aktifkan:hover {
+  background: #dcfce7;
 }
 
 /* =========================
