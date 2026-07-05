@@ -1,14 +1,12 @@
+import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+import { supabase } from "../../lib/supabase";
 import { useSearch } from "../../Contextt/SearchContext";
 import { globalFilter } from "../../utils/filterData";
-const isAdmin = true;
-
-const dataSurat = [
-  { id:1, nomorSurat:"001/SK/2025", tanggalSurat:"2025-06-01", tujuan:"BKD", perihal:"Undangan Rapat Koordinasi", file:"surat_keluar_001.pdf" },
-  { id:2, nomorSurat:"002/SK/2025", tanggalSurat:"2025-06-04", tujuan:"Kemendikbud", perihal:"Laporan Kegiatan Penelitian", file:"surat_keluar_002.pdf" },
-  { id:3, nomorSurat:"003/SK/2025", tanggalSurat:"2025-06-06", tujuan:"Rektor UNM", perihal:"Permohonan Dana Hibah", file:"surat_keluar_003.pdf" },
-];
+import SuratKeluarEdit from "../EditSurat/SuratKeluarEdit";
 
 function formatTanggal(dateStr) {
+  if (!dateStr) return "-";
   const bulan = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Ags","Sep","Okt","Nov","Des"];
   const [y, m, d] = dateStr.split("-");
   return `${parseInt(d)} ${bulan[parseInt(m) - 1]} ${y}`;
@@ -16,29 +14,72 @@ function formatTanggal(dateStr) {
 
 function SuratKeluar() {
   const { searchTerm } = useSearch();
+  const [dataSurat, setDataSurat] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editItem, setEditItem] = useState(null);
 
-  const filteredSurat = globalFilter(
-    dataSurat,
-    searchTerm
-  );
+  useEffect(() => { fetchData(); }, []);
+
+  async function fetchData() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("surat_keluar")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) console.error(error.message);
+    else setDataSurat(data || []);
+    setLoading(false);
+  }
+
+  async function handleDelete(id, fileUrl) {
+    const confirm = await Swal.fire({
+      title: "Hapus Surat?",
+      text: "Data surat dan file PDF akan dihapus permanen.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus",
+      cancelButtonText: "Batal",
+    });
+    if (!confirm.isConfirmed) return;
+
+    if (fileUrl) {
+      const path = fileUrl.split("/surat-keluar/")[1];
+      if (path) await supabase.storage.from("surat-keluar").remove([path]);
+    }
+
+    const { error } = await supabase.from("surat_keluar").delete().eq("id", id);
+    if (error) {
+      Swal.fire({ icon: "error", title: "Gagal!", text: error.message, confirmButtonColor: "#1A3A5C" });
+    } else {
+      setDataSurat((prev) => prev.filter((s) => s.id !== id));
+      Swal.fire({ icon: "success", title: "Dihapus!", text: "Surat berhasil dihapus.", confirmButtonColor: "#1A3A5C", timer: 1500, showConfirmButton: false });
+    }
+  }
+
+  const filteredSurat = globalFilter(dataSurat, searchTerm);
 
   return (
     <div style={s.wrap}>
       <style>{`
         .btn-pdf { background: #4A9FD5 !important; color: #fff !important; border: none; border-radius: 5px; padding: 4px 10px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
         .btn-pdf:hover { background: #2280BE !important; }
-        .btn-pdf:active, .btn-pdf:focus { background: #4A9FD5 !important; outline: none; }
-
         .btn-edit { background: #FFF3CD !important; color: #633806 !important; border: none; border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; margin-right: 5px; }
         .btn-edit:hover { background: #FAC775 !important; }
-        .btn-edit:active, .btn-edit:focus { background: #FFF3CD !important; outline: none; }
-
         .btn-delete { background: #FCEBEB !important; color: #791F1F !important; border: none; border-radius: 5px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
         .btn-delete:hover { background: #F7C1C1 !important; }
-        .btn-delete:active, .btn-delete:focus { background: #FCEBEB !important; outline: none; }
-
         .tbl-row:hover { background: #F5F8FC; }
       `}</style>
+
+      {/* Modal Edit */}
+      {editItem && (
+        <SuratKeluarEdit
+          suratKeluar={editItem}
+          onClose={() => setEditItem(null)}
+          onSaved={() => { setEditItem(null); fetchData(); }}
+        />
+      )}
 
       <div style={s.card}>
         <div style={s.cardHead}>
@@ -47,42 +88,53 @@ function SuratKeluar() {
         </div>
 
         <div style={s.cardBody}>
-          <div style={{ overflowX: "auto" }}>
-            <table style={s.table}>
-              <thead>
-                <tr>
-                  <th style={{ ...s.th, width: 36 }}>No</th>
-                  <th style={{ ...s.th, width: 120 }}>Nomor Surat</th>
-                  <th style={{ ...s.th, width: 110 }}>Tgl. Surat</th>
-                  <th style={{ ...s.th, width: 110 }}>Tujuan</th>
-                  <th style={s.th}>Perihal</th>
-                  <th style={{ ...s.th, width: 95 }}>File PDF</th>
-                  {isAdmin && <th style={{ ...s.th, width: 140 }}>Aksi</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSurat.map((item, index) => (
-                  <tr key={item.id} className="tbl-row">
-                    <td style={{ ...s.td, color: "#888", fontSize: 12 }}>{index + 1}</td>
-                    <td style={s.td}><span style={s.nomorBadge}>{item.nomorSurat}</span></td>
-                    <td style={{ ...s.td, color: "#888", fontSize: 12 }}>{formatTanggal(item.tanggalSurat)}</td>
-                    <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>{item.tujuan}</td>
-                    <td style={{ ...s.td, fontSize: 12.5 }}>{item.perihal}</td>
-                    <td style={s.td}>
-                      <button className="btn-pdf" onClick={() => window.open(item.file, "_blank")}>Lihat PDF</button>
-                    </td>
-                    {isAdmin && (
-                      <td style={s.td}>
-                        <button className="btn-edit" onClick={() => console.log("Edit:", item.id)}>Edit</button>
-                        <button className="btn-delete" onClick={() => console.log("Delete:", item.id)}>Hapus</button>
-                      </td>
-                    )}
+          {loading ? (
+            <p style={{ color: "#94a3b8", textAlign: "center", padding: "40px 0" }}>Memuat data...</p>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={s.table}>
+                <thead>
+                  <tr>
+                    <th style={{ ...s.th, width: 36 }}>No</th>
+                    <th style={{ ...s.th, width: 130 }}>Nomor Surat</th>
+                    <th style={{ ...s.th, width: 110 }}>Tgl. Surat</th>
+                    <th style={{ ...s.th, width: 120 }}>Tujuan</th>
+                    <th style={s.th}>Perihal</th>
+                    <th style={{ ...s.th, width: 95 }}>File PDF</th>
+                    <th style={{ ...s.th, width: 140 }}>Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
+                </thead>
+                <tbody>
+                  {filteredSurat.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: "center", color: "#94a3b8", padding: "40px 0" }}>
+                        Tidak ada surat ditemukan
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSurat.map((item, index) => (
+                      <tr key={item.id} className="tbl-row">
+                        <td style={{ ...s.td, color: "#888", fontSize: 12 }}>{index + 1}</td>
+                        <td style={s.td}><span style={s.nomorBadge}>{item.nomor_surat}</span></td>
+                        <td style={{ ...s.td, color: "#888", fontSize: 12 }}>{formatTanggal(item.tanggal_surat)}</td>
+                        <td style={{ ...s.td, fontWeight: 600, fontSize: 12.5 }}>{item.tujuan}</td>
+                        <td style={{ ...s.td, fontSize: 12.5 }}>{item.perihal}</td>
+                        <td style={s.td}>
+                          {item.file_url
+                            ? <button className="btn-pdf" onClick={() => window.open(item.file_url, "_blank")}>Lihat PDF</button>
+                            : <span style={{ color: "#ccc", fontSize: 12 }}>-</span>}
+                        </td>
+                        <td style={s.td}>
+                          <button className="btn-edit" onClick={() => setEditItem(item)}>Edit</button>
+                          <button className="btn-delete" onClick={() => handleDelete(item.id, item.file_url)}>Hapus</button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
           <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
             <span style={{ fontSize: 11.5, color: "#888" }}>
               Menampilkan {filteredSurat.length} dari {dataSurat.length} surat
@@ -106,6 +158,5 @@ const s = {
   td: { padding: "12px 12px", borderBottom: "0.5px solid #f0f0f0", verticalAlign: "middle", color: "#1A1A1A" },
   nomorBadge: { background: "#E6F1FB", color: "#0C447C", fontSize: 11.5, fontWeight: 600, padding: "2px 9px", borderRadius: 20, display: "inline-block", whiteSpace: "nowrap" },
 };
-
 
 export default SuratKeluar;

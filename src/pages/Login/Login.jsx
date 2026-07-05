@@ -9,17 +9,16 @@ function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     setLoading(true);
     setErrorMessage("");
 
     try {
+<<<<<<< HEAD
       const { data, error } =
         await supabase.auth.signInWithPassword({
           email,
@@ -28,12 +27,20 @@ function Login() {
 
       console.log("LOGIN DATA:", data);
       console.log("LOGIN ERROR:", error);
+=======
+      // 1. Login lewat Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+>>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
 
       if (error) {
-        setErrorMessage(error.message);
+        setErrorMessage("Email atau password salah");
         return;
       }
 
+<<<<<<< HEAD
       if (data.user) {
         navigate("/dashboard");
       }
@@ -43,6 +50,38 @@ function Login() {
       setErrorMessage(
         "Terjadi kesalahan saat menghubungi server."
       );
+=======
+      // 2. Cek status akun di tabel profiles
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("status, last_login")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError || !profile) {
+        await supabase.auth.signOut();
+        setErrorMessage("Gagal memverifikasi akun. Silakan coba lagi.");
+        return;
+      }
+
+      if (profile.status?.toLowerCase() !== "aktif") {
+        await supabase.auth.signOut();
+        setErrorMessage("Akun Anda telah dinonaktifkan. Hubungi administrator.");
+        return;
+      }
+
+      // 3. Update last_login HANYA kalau akun aktif dan lolos semua cek
+      await supabase
+        .from("profiles")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", data.user.id);
+
+      // 4. Masuk ke dashboard
+      navigate("/dashboard");
+    } catch (error) {
+      setErrorMessage("Terjadi kesalahan saat login");
+      console.error(error);
+>>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
     } finally {
       setLoading(false);
     }
@@ -52,27 +91,15 @@ function Login() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-header">
-          <img
-            src={logo}
-            alt="Logo SIPAS"
-            className="login-logo"
-          />
-
+          <img src={logo} alt="Logo SIPAS" className="login-logo" />
           <h1>SIPAS</h1>
-
-          <p>
-            Sistem Informasi Pengelolaan Arsip Surat
-          </p>
-
-          <small>
-            LP2M Universitas Negeri Makassar
-          </small>
+          <p>Sistem Informasi Pengelolaan Arsip Surat</p>
+          <small>LP2M Universitas Negeri Makassar</small>
         </div>
 
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label>Email</label>
-
             <input
               type="email"
               placeholder="Masukkan email"
@@ -86,7 +113,6 @@ function Login() {
 
           <div className="form-group">
             <label>Password</label>
-
             <input
               type="password"
               placeholder="Masukkan password"
@@ -99,6 +125,7 @@ function Login() {
           </div>
 
           {errorMessage && (
+<<<<<<< HEAD
             <div
               style={{
                 color: "#dc2626",
@@ -109,10 +136,14 @@ function Login() {
                 fontSize: "14px",
               }}
             >
+=======
+            <div style={{ color: "#dc2626", fontSize: "14px", marginBottom: "12px" }}>
+>>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
               {errorMessage}
             </div>
           )}
 
+<<<<<<< HEAD
           <button
             type="submit"
             className="login-btn"
@@ -121,6 +152,10 @@ function Login() {
             {loading
               ? "Memproses..."
               : "Masuk ke SIPAS"}
+=======
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "Memproses..." : "Masuk ke SIPAS"}
+>>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
           </button>
         </form>
       </div>

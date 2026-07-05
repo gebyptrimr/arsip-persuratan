@@ -12,6 +12,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 
 // Master Arsip
 import TambahAkun from "../pages/TambahAkun/TambahAkun.jsx"; // sesuaikan path
+import EditAkun from "../pages/EditAkun/EditAkun.jsx";
 
 import SuratMasuk from "../pages/SuratMasuk/SuratMasuk";
 import SuratKeluar from "../pages/SuratKeluar/SuratKeluar";
@@ -26,6 +27,14 @@ import SKTambah from "../pages/UploadArsip/SKTambah";
 import SuratTugasTambah from "../pages/UploadArsip/SuratTugasTambah";
 import SuratKeluarTambah from "../pages/UploadArsip/SuratKeluarTambah";
 import SuratMasukTambah from "../pages/UploadArsip/SuratMasukTambah";
+
+//Edit Surat
+import SuratMasukEdit from "../pages/EditSurat/SuratMasukEdit";
+import SuratKeluarEdit from "../pages/EditSurat/SuratKeluarEdit";
+import SKEdit from "../pages/EditSurat/SKEdit.jsx";
+import SuratTugasEdit from "../pages/EditSurat/SuratTugasEdit.jsx";
+
+
 
 // Retensi
 import RetensiArsip from "../pages/RetensiArsip/RetensiArsip";
@@ -49,6 +58,14 @@ function AppRoutes() {
         <Route path="/sk" element={<SuratKeputusan />} />
         <Route path="/kontrak" element={<Kontrak />} />
 
+        {/* Edit Surat */}
+        <Route path="/upload-arsip/surat-masuk-edit/:id" element={<SuratMasukEdit />} />
+        <Route path="/upload-arsip/surat-keluar-edit/:id" element={<SuratKeluarEdit />} />
+        <Route path="/upload-arsip/sk-edit/:id" element={<SKEdit />} />
+        <Route path="/upload-arsip/surat-tugas-edit/:id" element={<SuratTugasEdit />} />
+
+
+        
         {/* Upload Arsip */}
         <Route path="/upload-arsip" element={<UploadArsip />} />
 
@@ -75,6 +92,8 @@ function AppRoutes() {
         />
 
         <Route path="/retensi" element={<RetensiArsip />} />
+        
+        <Route path="/users/edit/:id" element={<EditAkun />} />
       </Route>
     </Routes>
   );
