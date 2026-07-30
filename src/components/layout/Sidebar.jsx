@@ -1,8 +1,5 @@
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
-<<<<<<< HEAD
 import Swal from "sweetalert2";
-=======
->>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
 import { supabase } from "../../lib/supabase";
 
 const navItems = [
@@ -12,7 +9,6 @@ const navItems = [
   { label: "Surat Keputusan", icon: "ti-certificate", path: "/sk" },
   { label: "Surat Tugas", icon: "ti-clipboard-list", path: "/surat-tugas" },
   { label: "Kontrak", icon: "ti-writing", path: "/kontrak" },
-  { label: "Retensi Arsip", icon: "ti-calendar-time", path: "/retensi" },
   { label: "Manajemen Akun", icon: "ti-users", path: "/users" },
 ];
 
@@ -20,30 +16,23 @@ export default function Sidebar({ collapsed, onToggle }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-<<<<<<< HEAD
-const handleLogout = async () => {
-  const result = await Swal.fire({
-    title: "Keluar dari SIPAS?",
-    text: "Apakah Anda yakin ingin mengakhiri sesi login?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Keluar",
-    cancelButtonText: "Batal",
-    reverseButtons: true,
-  });
+  async function handleLogout() {
+    const result = await Swal.fire({
+      title: "Keluar dari SIPAS?",
+      text: "Apakah Anda yakin ingin mengakhiri sesi login?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Keluar",
+      cancelButtonText: "Batal",
+      reverseButtons: true,
+    });
 
-  if (!result.isConfirmed) return;
+    if (!result.isConfirmed) return;
 
-  await supabase.auth.signOut();
-
-  navigate("/");
-};
-=======
-  const handleLogout = async () => {
     await supabase.auth.signOut();
+
     navigate("/");
-  };
->>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
+  }
 
   return (
     <aside
@@ -128,27 +117,12 @@ const handleLogout = async () => {
           onClick={handleLogout}
           style={{ width: "100%", display: "flex", alignItems: "center", gap: "12px", padding: "10px 12px", borderRadius: "10px", border: "none", background: "transparent", color: "rgba(255,255,255,.65)", justifyContent: collapsed ? "center" : "flex-start", cursor: "pointer", transition: ".2s ease", fontFamily: "DM Sans" }}
         >
-<<<<<<< HEAD
-          <i
-            className="ti ti-logout"
-            style={{ fontSize: "20px" }}
-          />
-
+          <i className="ti ti-logout" style={{ fontSize: "20px" }} />
           {!collapsed && (
-            <span
-              style={{
-                fontSize: "14px",
-                fontFamily: "DM Sans",
-                whiteSpace: "nowrap",
-              }}
-            >
+            <span style={{ fontSize: "14px", fontFamily: "DM Sans", whiteSpace: "nowrap" }}>
               Keluar
             </span>
           )}
-=======
-          <i className="ti ti-logout" style={{ fontSize: "20px" }} />
-          {!collapsed && <span style={{ fontSize: "14px", fontFamily: "DM Sans", whiteSpace: "nowrap" }}>Keluar</span>}
->>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
         </button>
       </div>
 

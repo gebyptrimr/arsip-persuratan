@@ -37,7 +37,7 @@ import SuratTugasEdit from "../pages/EditSurat/SuratTugasEdit.jsx";
 
 
 // Retensi
-import RetensiArsip from "../pages/RetensiArsip/RetensiArsip";
+
 
 function AppRoutes() {
   return (
@@ -91,7 +91,7 @@ function AppRoutes() {
           element={<SuratMasukTambah />}
         />
 
-        <Route path="/retensi" element={<RetensiArsip />} />
+
         
         <Route path="/users/edit/:id" element={<EditAkun />} />
       </Route>
