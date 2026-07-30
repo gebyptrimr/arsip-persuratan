@@ -18,39 +18,17 @@ function Login() {
     setErrorMessage("");
 
     try {
-<<<<<<< HEAD
-      const { data, error } =
-        await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-      console.log("LOGIN DATA:", data);
-      console.log("LOGIN ERROR:", error);
-=======
       // 1. Login lewat Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
->>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
 
       if (error) {
         setErrorMessage("Email atau password salah");
         return;
       }
 
-<<<<<<< HEAD
-      if (data.user) {
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      console.error("CATCH ERROR:", err);
-
-      setErrorMessage(
-        "Terjadi kesalahan saat menghubungi server."
-      );
-=======
       // 2. Cek status akun di tabel profiles
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
@@ -66,7 +44,9 @@ function Login() {
 
       if (profile.status?.toLowerCase() !== "aktif") {
         await supabase.auth.signOut();
-        setErrorMessage("Akun Anda telah dinonaktifkan. Hubungi administrator.");
+        setErrorMessage(
+          "Akun Anda telah dinonaktifkan. Hubungi administrator.",
+        );
         return;
       }
 
@@ -81,7 +61,6 @@ function Login() {
     } catch (error) {
       setErrorMessage("Terjadi kesalahan saat login");
       console.error(error);
->>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
     } finally {
       setLoading(false);
     }
@@ -104,9 +83,7 @@ function Login() {
               type="email"
               placeholder="Masukkan email"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -117,45 +94,25 @@ function Login() {
               type="password"
               placeholder="Masukkan password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
 
           {errorMessage && (
-<<<<<<< HEAD
             <div
               style={{
                 color: "#dc2626",
-                background: "#fee2e2",
-                padding: "10px",
-                borderRadius: "8px",
-                marginBottom: "15px",
                 fontSize: "14px",
+                marginBottom: "12px",
               }}
             >
-=======
-            <div style={{ color: "#dc2626", fontSize: "14px", marginBottom: "12px" }}>
->>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
               {errorMessage}
             </div>
           )}
 
-<<<<<<< HEAD
-          <button
-            type="submit"
-            className="login-btn"
-            disabled={loading}
-          >
-            {loading
-              ? "Memproses..."
-              : "Masuk ke SIPAS"}
-=======
           <button type="submit" className="login-btn" disabled={loading}>
             {loading ? "Memproses..." : "Masuk ke SIPAS"}
->>>>>>> ca663ae85c0d0c8dcdc6a490c8bc5a6a170ea093
           </button>
         </form>
       </div>
