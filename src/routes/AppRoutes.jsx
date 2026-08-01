@@ -39,6 +39,11 @@ import RetensiArsip from "../pages/RetensiArsip/RetensiArsip";
 
 //Kebijakan dan perencanaan
 import Kebijakan from "../pages/Kebijakan/Kebijakan";
+import UploadArsipKebijakan from "../pages/UploadArsip/UploadArsipKebijakan";
+import RenstraTambah from "../pages/UploadArsip/RenstraTambah";
+import RoadmapTambah from "../pages/UploadArsip/RoadmapTambah";
+import RenstraLppm from "../pages/Kebijakan/renstra-lppm";
+import Roadmap from "../pages/Kebijakan/roadmap";
 
 function AppRoutes() {
   return (
@@ -104,8 +109,18 @@ function AppRoutes() {
         <Route path="/users/edit/:id" element={<EditAkun />} />
 
         {/* Kebijakan */}
-        <Route path="/kebijakan" element={<UploadArsip />} />
-        <Route path="/kebijakan/kebijakan" element={<Kebijakan />} />
+        <Route path="/kebijakan" element={<UploadArsipKebijakan />} />
+        <Route path="/kebijakan/renstra-tambah" element={<RenstraTambah />} />
+        <Route path="/kebijakan/roadmap-tambah" element={<RoadmapTambah />} />
+        <Route path="/klasifikasi/kebijakan" element={<Kebijakan />} />
+        <Route
+          path="/klasifikasi/kebijakan/renstra-lppm"
+          element={<RenstraLppm />}
+        />
+        <Route
+          path="/klasifikasi/kebijakan/roadmap"
+          element={<Roadmap />}
+        />
       </Route>
     </Routes>
   );

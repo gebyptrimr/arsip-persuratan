@@ -1,37 +1,26 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../../lib/supabase";
 
-// Data kartu kategori dokumen di halaman Kebijakan & Perencanaan
-// path: null → kartu tidak bisa diklik (belum ada halaman detail)
-const categoryCards = [
+// Konfigurasi tampilan kartu kategori dokumen di halaman Kebijakan & Perencanaan
+// jenis → dipakai untuk query ke tabel arsip_kebijakan (kolom "jenis")
+// path → tujuan saat kartu diklik / tombol "Lihat data" ditekan
+const categoryConfig = [
   {
-    label: "Renstra",
-    count: 24,
-    trend: "+3 bulan ini",
-    trendPositive: true,
+    jenis: "renstra",
+    label: "Renstra LPPM",
     icon: "ti-file-analytics",
     bg: "#E7F3EA",
     fg: "#1E8E4F",
-    path: "/klasifikasi/kebijakan/renstra",
+    path: "/klasifikasi/kebijakan/renstra-lppm",
   },
   {
-    label: "LPPM",
-    count: 18,
-    trend: "+1 bulan ini",
-    trendPositive: true,
+    jenis: "roadmap",
+    label: "Roadmap",
     icon: "ti-building-bank",
     bg: "#E9EEFB",
     fg: "#2E5AAC",
-    path: "/klasifikasi/kebijakan/lppm",
-  },
-  {
-    label: "Roadmap",
-    count: 6,
-    trend: "Tetap",
-    trendPositive: false,
-    icon: "ti-map-2",
-    bg: "#FDF1E4",
-    fg: "#C2740E",
-    path: null,
+    path: "/klasifikasi/kebijakan/roadmap",
   },
 ];
 
@@ -97,7 +86,7 @@ function CategoryCard({ item }) {
       </div>
 
       <div style={{ fontSize: "22px", fontWeight: 500, color: item.fg }}>
-        {item.count.toLocaleString("id-ID")}
+        {item.count === null ? "-" : item.count.toLocaleString("id-ID")}
       </div>
 
       <div style={{ fontSize: "11px", color: "#8B93A8", marginTop: "4px" }}>
@@ -111,7 +100,7 @@ function CategoryCard({ item }) {
           marginTop: "8px",
         }}
       >
-        {item.trend}
+        {item.count === null ? "Memuat..." : item.trend}
       </div>
 
       {clickable && (
@@ -136,6 +125,45 @@ function CategoryCard({ item }) {
 
 export default function KebijakanPage() {
   const navigate = useNavigate();
+  const [cards, setCards] = useState(
+    categoryConfig.map((c) => ({ ...c, count: null, trend: "", trendPositive: true }))
+  );
+
+  useEffect(() => {
+    loadCounts();
+  }, []);
+
+  async function loadCounts() {
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    const results = await Promise.all(
+      categoryConfig.map(async (item) => {
+        const totalRes = await supabase
+          .from("arsip_kebijakan")
+          .select("*", { count: "exact", head: true })
+          .eq("jenis", item.jenis);
+
+        const monthRes = await supabase
+          .from("arsip_kebijakan")
+          .select("*", { count: "exact", head: true })
+          .eq("jenis", item.jenis)
+          .gte("created_at", firstDayOfMonth);
+
+        const total = totalRes.error ? 0 : totalRes.count || 0;
+        const monthCount = monthRes.error ? 0 : monthRes.count || 0;
+
+        return {
+          ...item,
+          count: total,
+          trend: monthCount > 0 ? `+${monthCount} bulan ini` : "Belum ada bulan ini",
+          trendPositive: monthCount > 0,
+        };
+      })
+    );
+
+    setCards(results);
+  }
 
   return (
     <div style={{ fontFamily: "DM Sans", padding: "24px" }}>
@@ -152,7 +180,7 @@ export default function KebijakanPage() {
       >
         <div>
           <p style={{ fontSize: "11px", color: "#8B93A8", margin: 0 }}>
-            03.02.01 &middot; Kebijakan &amp; Perencanaan
+            03.02.01
           </p>
 
           <h2
@@ -163,12 +191,12 @@ export default function KebijakanPage() {
               fontWeight: 600,
             }}
           >
-            Dokumen Kebijakan, Renstra &amp; Renja LPPM
+            KEBIJAKAN, RENSTRA, RENJA LPPM
           </h2>
         </div>
 
         <button
-          onClick={() => navigate("/upload-arsip")}
+          onClick={() => navigate("/kebijakan")}
           style={{
             display: "flex",
             alignItems: "center",
@@ -197,7 +225,7 @@ export default function KebijakanPage() {
           gap: "14px",
         }}
       >
-        {categoryCards.map((item) => (
+        {cards.map((item) => (
           <CategoryCard key={item.label} item={item} />
         ))}
       </div>

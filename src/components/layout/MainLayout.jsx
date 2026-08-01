@@ -6,33 +6,45 @@ import Navbar from "./Navbar";
 export default function MainLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
+
+  const sidebarWidth = sidebarCollapsed ? 72 : 280;
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#F0F4F8" }}>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        background: "#F5F8FC",
+      }}
+    >
       <Sidebar
         collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((v) => !v)}
+        onToggle={() => setSidebarCollapsed((prev) => !prev)}
       />
-      <div style={{
-        flex: 1,
-        marginLeft: sidebarCollapsed ? "72px" : "240px",
-        transition: "margin-left 0.25s cubic-bezier(.4,0,.2,1)",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-      }}>
-        <Navbar
-          sidebarCollapsed={sidebarCollapsed}
-          onToggleSidebar={() => setSidebarCollapsed((v) => !v)}
-        />
+
+      {/* CONTENT */}
+      <div
+        style={{
+          marginLeft: sidebarWidth,
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          transition: "all .3s ease",
+          minHeight: "100vh",
+        }}
+      >
+        <Navbar sidebarCollapsed={sidebarCollapsed} />
+
       <main
-  style={{
-    marginTop: "68px",
-    padding: 0,
-    flex: 1,
-  }}
->
-  <Outlet />
-</main>
+        style={{
+          padding: "0 10px", // atas kanan bawah kiri
+          flex: 1,
+          boxSizing: "border-box",
+          overflowX: "hidden",
+        }}
+      >
+          <Outlet />
+        </main>
       </div>
     </div>
   );
