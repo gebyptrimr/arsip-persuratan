@@ -21,16 +21,16 @@ function DashboardCharts() {
   return (
     <div className="chart-card">
       <div className="chart-header">
-    <div>
-        <h3>Arsip per Bulan</h3>
-        <p>Jumlah arsip yang tercatat tahun 2026</p>
-    </div>
+        <div>
+          <h3>Arsip per Bulan</h3>
+          <p>Jumlah arsip yang tercatat tahun 2026</p>
+        </div>
 
-    <button className="btn-chart-filter">
-        6 Bulan Terakhir
-        <i className="ti ti-chevron-down"></i>
-    </button>
-</div>
+        <button className="btn-chart-filter">
+          6 Bulan Terakhir
+          <i className="ti ti-chevron-down"></i>
+        </button>
+      </div>
 
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data}>
@@ -42,11 +42,7 @@ function DashboardCharts() {
 
           <Tooltip />
 
-          <Bar
-            dataKey="arsip"
-            fill="#163b67"
-            radius={[8, 8, 0, 0]}
-          />
+          <Bar dataKey="arsip" fill="#163b67" radius={[8, 8, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
