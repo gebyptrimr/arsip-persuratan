@@ -21,7 +21,7 @@ const menuItems = [
   accordionItem("Kebijakan & Perencanaan", "ti-gavel", [
     {
       label: "Kebijakan, Renstra, Renja LPPM",
-      path: "/kebijakan/kebijakan",
+      path: "/klasifikasi/kebijakan",
     },
     {
       label: "Peraturan, SK Ka.LPPM",
