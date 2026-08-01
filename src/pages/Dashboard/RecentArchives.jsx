@@ -1,107 +1,46 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-
 function RecentArchives() {
-  const [archives, setArchives] = useState([]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadArchives() {
-      try {
-        const [
-          suratMasuk,
-          suratKeluar,
-          suratKeputusan,
-          suratTugas,
-          kontrak,
-        ] = await Promise.all([
-          supabase
-            .from("surat_masuk")
-            .select("id, nomor_surat, perihal, created_at"),
-
-          supabase
-            .from("surat_keluar")
-            .select("id, nomor_surat, perihal, created_at"),
-
-          supabase
-            .from("surat_keputusan")
-            .select("id, nomor_sk, judul_sk, created_at"),
-
-          supabase
-            .from("surat_tugas")
-            .select("id, nomor_st, tujuan_tugas, created_at"),
-
-          supabase
-            .from("kontrak")
-            .select("id, nomor_kontrak, pihak_kedua, created_at"),
-        ]);
-
-        const semuaArsip = [
-          ...(suratMasuk.data || []).map((item) => ({
-            id: item.id,
-            jenis: "Surat Masuk",
-            nomor: item.nomor_surat,
-            perihal: item.perihal,
-            tanggal: item.created_at,
-            status: "Baru",
-          })),
-
-          ...(suratKeluar.data || []).map((item) => ({
-            id: item.id,
-            jenis: "Surat Keluar",
-            nomor: item.nomor_surat,
-            perihal: item.perihal,
-            tanggal: item.created_at,
-            status: "Baru",
-          })),
-
-          ...(suratKeputusan.data || []).map((item) => ({
-            id: item.id,
-            jenis: "Surat Keputusan",
-            nomor: item.nomor_sk,
-            perihal: item.judul_sk,
-            tanggal: item.created_at,
-            status: "Baru",
-          })),
-
-          ...(suratTugas.data || []).map((item) => ({
-            id: item.id,
-            jenis: "Surat Tugas",
-            nomor: item.nomor_st,
-            perihal: item.tujuan_tugas,
-            tanggal: item.created_at,
-            status: "Baru",
-          })),
-
-          ...(kontrak.data || []).map((item) => ({
-            id: item.id,
-            jenis: "Kontrak",
-            nomor: item.nomor_kontrak,
-            perihal: item.pihak_kedua,
-            tanggal: item.created_at,
-            status: "Baru",
-          })),
-        ];
-
-        semuaArsip.sort(
-          (a, b) => new Date(b.tanggal) - new Date(a.tanggal)
-        );
-
-        if (isMounted) {
-          setArchives(semuaArsip.slice(0, 5));
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    loadArchives();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const archives = [
+    {
+      id: 1,
+      jenis: "Surat Masuk",
+      nomor: "SM-025/2026",
+      perihal: "Undangan Rapat Evaluasi Program",
+      tanggal: "10 Jun 2026",
+      status: "Baru",
+    },
+    {
+      id: 2,
+      jenis: "Surat Keluar",
+      nomor: "SK-018/2026",
+      perihal: "Permohonan Data Penelitian",
+      tanggal: "09 Jun 2026",
+      status: "Baru",
+    },
+    {
+      id: 3,
+      jenis: "Surat Keputusan",
+      nomor: "SKP-012/2026",
+      perihal: "Penetapan Tim Reviewer",
+      tanggal: "08 Jun 2026",
+      status: "Baru",
+    },
+    {
+      id: 4,
+      jenis: "Kontrak",
+      nomor: "KTR-003/2026",
+      perihal: "Kerja Sama Penelitian",
+      tanggal: "07 Jun 2026",
+      status: "Baru",
+    },
+    {
+      id: 5,
+      jenis: "Surat Tugas",
+      nomor: "ST-009/2026",
+      perihal: "Monitoring Kegiatan",
+      tanggal: "06 Jun 2026",
+      status: "Baru",
+    },
+  ];
 
   return (
     <div className="recent-card">
@@ -128,9 +67,9 @@ function RecentArchives() {
           </thead>
 
           <tbody>
-            {archives.map((item, index) => (
-              <tr key={`${item.jenis}-${item.id}`}>
-                <td>{index + 1}</td>
+            {archives.map((item) => (
+              <tr key={item.id}>
+                <td>{item.id}</td>
 
                 <td>{item.jenis}</td>
 
@@ -140,9 +79,7 @@ function RecentArchives() {
 
                 <td>{item.perihal}</td>
 
-                <td>
-                  {new Date(item.tanggal).toLocaleDateString("id-ID")}
-                </td>
+                <td>{item.tanggal}</td>
 
                 <td>
                   <span className="status-badge">
@@ -151,20 +88,6 @@ function RecentArchives() {
                 </td>
               </tr>
             ))}
-
-            {archives.length === 0 && (
-              <tr>
-                <td
-                  colSpan="6"
-                  style={{
-                    textAlign: "center",
-                    padding: "20px",
-                  }}
-                >
-                  Belum ada arsip.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>

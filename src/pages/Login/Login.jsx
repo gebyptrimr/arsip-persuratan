@@ -18,6 +18,7 @@ function Login() {
     setErrorMessage("");
 
     try {
+      // 1. Login lewat Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -28,32 +29,35 @@ function Login() {
         return;
       }
 
-      if (data?.user) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("status, last_login")
-          .eq("id", data.user.id)
-          .single();
+      // 2. Cek status akun di tabel profiles
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("status, last_login")
+        .eq("id", data.user.id)
+        .single();
 
-        if (profileError || !profile) {
-          await supabase.auth.signOut();
-          setErrorMessage("Gagal memverifikasi akun. Silakan coba lagi.");
-          return;
-        }
-
-        if (profile.status?.toLowerCase() !== "aktif") {
-          await supabase.auth.signOut();
-          setErrorMessage("Akun Anda telah dinonaktifkan. Hubungi administrator.");
-          return;
-        }
-
-        await supabase
-          .from("profiles")
-          .update({ last_login: new Date().toISOString() })
-          .eq("id", data.user.id);
-
-        navigate("/dashboard");
+      if (profileError || !profile) {
+        await supabase.auth.signOut();
+        setErrorMessage("Gagal memverifikasi akun. Silakan coba lagi.");
+        return;
       }
+
+      if (profile.status?.toLowerCase() !== "aktif") {
+        await supabase.auth.signOut();
+        setErrorMessage(
+          "Akun Anda telah dinonaktifkan. Hubungi administrator.",
+        );
+        return;
+      }
+
+      // 3. Update last_login HANYA kalau akun aktif dan lolos semua cek
+      await supabase
+        .from("profiles")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", data.user.id);
+
+      // 4. Masuk ke dashboard
+      navigate("/dashboard");
     } catch (error) {
       setErrorMessage("Terjadi kesalahan saat login");
       console.error(error);
@@ -79,9 +83,7 @@ function Login() {
               type="email"
               placeholder="Masukkan email"
               value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -92,9 +94,7 @@ function Login() {
               type="password"
               placeholder="Masukkan password"
               value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
@@ -103,22 +103,15 @@ function Login() {
             <div
               style={{
                 color: "#dc2626",
-                background: "#fee2e2",
-                padding: "10px",
-                borderRadius: "8px",
-                marginBottom: "15px",
                 fontSize: "14px",
+                marginBottom: "12px",
               }}
             >
               {errorMessage}
             </div>
           )}
 
-          <button
-            type="submit"
-            className="login-btn"
-            disabled={loading}
-          >
+          <button type="submit" className="login-btn" disabled={loading}>
             {loading ? "Memproses..." : "Masuk ke SIPAS"}
           </button>
         </form>

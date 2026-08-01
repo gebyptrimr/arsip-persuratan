@@ -187,7 +187,7 @@ function KontrakTambah() {
                     value={formData.nomorKontrak}
                     onChange={handleChange}
                     style={s.input}
-                    placeholder="Contoh: 2782/DST/UN36.12/TU/2026"
+                    placeholder="Contoh: KTR-001/2025"
                     required
                   />
                 </Field>
@@ -232,7 +232,7 @@ function KontrakTambah() {
                     value={formData.pihakKedua}
                     onChange={handleChange}
                     style={s.input}
-                    placeholder="Nama Pihak Kedua"
+                    placeholder="Nama instansi / lembaga pihak kedua"
                   />
                 </Field>
               </div>
