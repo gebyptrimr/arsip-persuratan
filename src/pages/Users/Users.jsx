@@ -38,11 +38,6 @@ export default function Users() {
   const navigate = useNavigate();
   const { searchTerm } = useSearch();
 
-  useEffect(() => {
-    fetchUsers();
-    fetchCurrentUser();
-  }, []);
-
   async function fetchCurrentUser() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -64,6 +59,13 @@ export default function Users() {
     else setUsers(data || []);
     setLoading(false);
   }
+
+  useEffect(() => {
+    (async () => {
+      await fetchUsers();
+      await fetchCurrentUser();
+    })();
+  }, []);
 
   async function toggleStatus(user) {
     const newStatus = user.status === "Aktif" ? "Nonaktif" : "Aktif";
