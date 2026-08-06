@@ -60,7 +60,7 @@ const jenisArsip = [
   },
 ];
 
-function UploadArsipKebijakan() {
+function UploadArsipLaporanKeuangan() {
   const [jenis, setJenis] = useState("");
   const navigate = useNavigate();
 
@@ -352,4 +352,4 @@ const s = {
   },
 };
 
-export default UploadArsipKebijakan;
+export default UploadArsipLaporanKeuangan;

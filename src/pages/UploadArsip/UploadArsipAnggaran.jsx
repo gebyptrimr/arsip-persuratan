@@ -16,8 +16,8 @@ function InjectStyle() {
 
 const jenisArsip = [
   {
-    value: "renstra",
-    label: "Renstra LPPM",
+    value: "dipa",
+    label: "DIPA",
     icon: (
       <svg
         width="22"
@@ -36,8 +36,8 @@ const jenisArsip = [
     ),
   },
   {
-    value: "roadmap",
-    label: "Roadmap",
+    value: "rka",
+    label: "RKAKL",
     icon: (
       <svg
         width="22"
@@ -60,7 +60,7 @@ const jenisArsip = [
   },
 ];
 
-function UploadArsipKebijakan() {
+function UploadArsipAnggaran() {
   const [jenis, setJenis] = useState("");
   const navigate = useNavigate();
 
@@ -352,4 +352,4 @@ const s = {
   },
 };
 
-export default UploadArsipKebijakan;
+export default UploadArsipAnggaran;

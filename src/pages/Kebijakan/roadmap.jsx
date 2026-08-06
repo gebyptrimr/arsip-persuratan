@@ -1,7 +1,3 @@
-import ArsipKebijakanList from "./arsip-kebijakan-list";
-
-function Roadmap() {
-  return <ArsipKebijakanList jenis="roadmap" jenisLabel="Roadmap" />;
-}
-
-export default Roadmap;
+// pages/roadmap.jsx
+import ArsipTablePage from "../../components/arsip/ArsipTablePage";
+export default function Roadmap() { return <ArsipTablePage configKey="roadmap" />; }

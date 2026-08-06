@@ -16,8 +16,8 @@ function InjectStyle() {
 
 const jenisArsip = [
   {
-    value: "renstra",
-    label: "Renstra LPPM",
+    value: "sk-reviewer",
+    label: "SK Reviewer",
     icon: (
       <svg
         width="22"
@@ -36,8 +36,8 @@ const jenisArsip = [
     ),
   },
   {
-    value: "roadmap",
-    label: "Roadmap",
+    value: "sk-lppm",
+    label: "SK LPPM",
     icon: (
       <svg
         width="22"
@@ -60,13 +60,13 @@ const jenisArsip = [
   },
 ];
 
-function UploadArsipKebijakan() {
+function UploadArsipPeraturan() {
   const [jenis, setJenis] = useState("");
   const navigate = useNavigate();
 
   const handleLanjut = () => {
-    if (jenis === "renstra") navigate("/kebijakan/renstra-tambah");
-    else if (jenis === "roadmap") navigate("/kebijakan/roadmap-tambah");
+    if (jenis === "sk-reviewer") navigate("/peraturan/sk-reviewer-tambah");
+    else if (jenis === "sk-lppm") navigate("/peraturan/sk-lppm-tambah");
   };
 
   return (
@@ -94,7 +94,7 @@ function UploadArsipKebijakan() {
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={s.cardTitle}>Upload Arsip</div>
             <div style={s.cardSub}>
-              Pilih jenis arsip Kebijakan, Renstra, Renja LPPM
+              Pilih jenis arsip Peraturan, SK Ka.LPPM
             </div>
           </div>
         </div>
@@ -352,4 +352,4 @@ const s = {
   },
 };
 
-export default UploadArsipKebijakan;
+export default UploadArsipPeraturan;
