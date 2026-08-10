@@ -1,3 +1,3 @@
 // pages/Kebijakan.jsx
 import BidangListPage from "../../components/arsip/BidangListPage";
-export default function Kebijakan() { return <BidangListPage bidangKey="kebijakan" />; }
+export default function Peraturan() { return <BidangListPage bidangKey="peraturan" />; }
