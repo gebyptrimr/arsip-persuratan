@@ -91,7 +91,7 @@ export default function Sidebar({ collapsed, onToggle }) {
   return (
     <aside
       style={{
-        width: collapsed ? "72px" : "240px",
+        width: collapsed ? "72px" : "290px",
         minHeight: "100vh",
         background:
           "linear-gradient(180deg, #0F2A4A 0%, #1B3F6E 60%, #1E4D8C 100%)",

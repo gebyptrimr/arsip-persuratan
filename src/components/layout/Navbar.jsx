@@ -3,7 +3,7 @@ import logo from "../../assets/logo.jpeg";
 import { useSearch } from "../../Contextt/SearchContext";
 import { supabase } from "../../lib/supabase";
 
-export default function Navbar({ sidebarCollapsed }) {
+export default function Navbar() {
   const [search, setSearch] = useState("");
   const [userProfile, setUserProfile] = useState(null);
   const { setSearchTerm } = useSearch();
@@ -14,69 +14,188 @@ export default function Navbar({ sidebarCollapsed }) {
 
   useEffect(() => {
     async function fetchProfile() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) return;
+
       const { data } = await supabase
         .from("profiles")
         .select("nama, jabatan, role")
         .eq("id", user.id)
         .single();
+
       if (data) setUserProfile(data);
     }
+
     fetchProfile();
   }, []);
 
   function getInitials(nama = "") {
-    return nama.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+    return nama
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 1)
+      .toUpperCase();
   }
 
-  const avatarColor = userProfile?.role === "admin" ? "#163b67" : "#16a34a";
+
+
+  const avatarColor =
+    userProfile?.role === "admin"
+      ? "#163B67"
+      : "#16A34A";
 
   return (
-    <header style={{ position: "fixed", top: 0, left: sidebarCollapsed ? "72px" : "240px", right: 0, height: "68px", background: "#FFFFFF", borderBottom: "1px solid #E8EDF3", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", zIndex: 90, transition: "left 0.25s cubic-bezier(.4,0,.2,1)" }}>
+    <header
+      style={{
+        position: "sticky",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "70px",
+        background: "#fff",
+        borderBottom: "1px solid #E5EAF2",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 20px",
 
-      {/* LEFT */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <img src={logo} alt="Logo SIPAS" style={{ width: "42px", height: "42px", objectFit: "cover", borderRadius: "10px" }} />
+        boxSizing: "border-box",
+
+        zIndex: 99,
+      }}
+    >
+      {/* ================= LEFT ================= */}
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexShrink: 0,
+        }}
+      >
+        <img
+          src={logo}
+          alt=""
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 10,
+          }}
+        />
+
         <div>
-          <div style={{ fontSize: "20px", fontWeight: 700, color: "#0F2A4A", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.2 }}>SIPAS</div>
-          <div style={{ fontSize: "15px", color: "#3d4349", fontFamily: "'DM Sans', sans-serif" }}>Sistem Pengelolaan Arsip Surat</div>
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: 24,
+              color: "#163B67",
+            }}
+          >
+            SIPAS
+          </div>
+
+          <div
+            style={{
+              color: "#5F6B7A",
+              fontSize: 14,
+            }}
+          >
+            Sistem Pengelolaan Arsip Surat
+          </div>
         </div>
       </div>
 
-      {/* RIGHT */}
-      <div style={{ display: "flex", alignItems: "center", gap: "18px" }}>
-        {/* SEARCH */}
-        <div style={{ position: "relative" }}>
-          <i className="ti ti-search" style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#8DA4BF", fontSize: "16px" }} />
+      {/* ================= RIGHT ================= */}
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 20,
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+          }}
+        >
+          <i
+            className="ti ti-search"
+            style={{
+              position: "absolute",
+              left: 12,
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#8DA4BF",
+            }}
+          />
+
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nomor surat, perihal..."
-            style={{ width: "320px", height: "40px", paddingLeft: "38px", paddingRight: "12px", border: "1px solid #E0E8F0", borderRadius: "10px", background: "#F5F8FC", outline: "none", fontSize: "13px" }}
+            style={{
+              width: 320,
+              height: 42,
+              paddingLeft: 38,
+              borderRadius: 10,
+              border: "1px solid #DCE4EF",
+              background: "#F7F9FC",
+              outline: "none",
+            }}
           />
         </div>
 
-        {/* PROFILE */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: avatarColor, color: "#FFF", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px" }}>
-            {userProfile ? getInitials(userProfile.nama) : "..."}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: "50%",
+              background: avatarColor,
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 700,
+            }}
+          >
+            {userProfile ? getInitials(userProfile.nama) : ".."}
           </div>
+
           <div>
-            <div style={{ fontSize: "13px", fontWeight: 600, color: "#0F2A4A" }}>
-              {userProfile?.nama || "Memuat..."}
+            <div
+              style={{
+                fontWeight: 600,
+                color: "#163B67",
+              }}
+            >
+              {userProfile?.nama}
             </div>
-            <div style={{ fontSize: "11px", color: "#8DA4BF" }}>
-              {userProfile?.jabatan || ""}
+
+            <div
+              style={{
+                fontSize: 13,
+                color: "#7C8797",
+              }}
+            >
+              {userProfile?.jabatan}
             </div>
           </div>
         </div>
       </div>
-
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
-        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css');
-      `}</style>
     </header>
   );
 }
