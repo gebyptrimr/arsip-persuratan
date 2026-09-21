@@ -16,8 +16,8 @@ function InjectStyle() {
 
 const jenisArsip = [
   {
-    value: "spjHibah",
-    label: "SPJ Hibah",
+    value: "suratMasuk",
+    label: "Surat Masuk",
     icon: (
       <svg
         width="22"
@@ -36,8 +36,8 @@ const jenisArsip = [
     ),
   },
   {
-    value: "kwitansi",
-    label: "Kwitansi",
+    value: "suratKeluar",
+    label: "Surat Keluar",
     icon: (
       <svg
         width="22"
@@ -47,26 +47,45 @@ const jenisArsip = [
         stroke="currentColor"
         strokeWidth="1.8"
       >
-        <path d="M3 21V9a2 2 0 012-2h4V5a2 2 0 012-2h2a2 2 0 012 2v2h4a2 2 0 012 2v12" />
-        <line x1="3" y1="21" x2="21" y2="21" />
-        <line x1="9" y1="9" x2="9" y2="9.01" />
-        <line x1="9" y1="13" x2="9" y2="13.01" />
-        <line x1="9" y1="17" x2="9" y2="17.01" />
-        <line x1="15" y1="9" x2="15" y2="9.01" />
-        <line x1="15" y1="13" x2="15" y2="13.01" />
-        <line x1="15" y1="17" x2="15" y2="17.01" />
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <line x1="10" y1="9" x2="8" y2="9" />
+      </svg>
+    ),
+  },
+  {
+    value: "ba",
+    label: "BA",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <line x1="10" y1="9" x2="8" y2="9" />
       </svg>
     ),
   },
 ];
 
-function UploadArsipLaporanKeuangan() {
+function UploadKepegawaian() {
   const [jenis, setJenis] = useState("");
   const navigate = useNavigate();
 
   const handleLanjut = () => {
-    if (jenis === "spjHibah") navigate("/laporankeuangan/spjHibah-tambah");
-    else if (jenis === "kwitansi") navigate("/laporankeuangan/kwitansi-tambah");
+    if (jenis === "suratMasuk") navigate("/kepegawaian/surat-masuk-tambah");
+    else if (jenis === "suratKeluar")
+      navigate("/kepegawaian/surat-keluar-tambah");
+    if (jenis === "ba") navigate("/kepegawaian/ba-tambah");
   };
 
   return (
@@ -94,7 +113,7 @@ function UploadArsipLaporanKeuangan() {
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={s.cardTitle}>Upload Arsip</div>
             <div style={s.cardSub}>
-              Pilih jenis arsip Laporan Keuangan, SPJ
+              Pilih jenis arsip Proposal, SK, Kontrak, Laporan
             </div>
           </div>
         </div>
@@ -352,4 +371,4 @@ const s = {
   },
 };
 
-export default UploadArsipLaporanKeuangan;
+export default UploadKepegawaian;

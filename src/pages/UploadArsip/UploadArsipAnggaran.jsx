@@ -37,7 +37,7 @@ const jenisArsip = [
   },
   {
     value: "rka",
-    label: "RKAKL",
+    label: "RKA",
     icon: (
       <svg
         width="22"
@@ -58,6 +58,26 @@ const jenisArsip = [
       </svg>
     ),
   },
+  {
+    value: "rkakl",
+    label: "RKAKL",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      >
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <line x1="10" y1="9" x2="8" y2="9" />
+      </svg>
+    ),
+  },
 ];
 
 function UploadArsipAnggaran() {
@@ -65,8 +85,9 @@ function UploadArsipAnggaran() {
   const navigate = useNavigate();
 
   const handleLanjut = () => {
-    if (jenis === "renstra") navigate("/kebijakan/renstra-tambah");
-    else if (jenis === "roadmap") navigate("/kebijakan/roadmap-tambah");
+    if (jenis === "dipa") navigate("/anggaran/dipa-tambah");
+    else if (jenis === "rka") navigate("/anggaran/rka-tambah");
+    else if (jenis === "rkakl") navigate("/anggaran/rkakl-tambah");
   };
 
   return (
@@ -94,7 +115,7 @@ function UploadArsipAnggaran() {
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={s.cardTitle}>Upload Arsip</div>
             <div style={s.cardSub}>
-              Pilih jenis arsip Kebijakan, Renstra, Renja LPPM
+              Pilih jenis arsip Anggaran, DIPA LPPM
             </div>
           </div>
         </div>

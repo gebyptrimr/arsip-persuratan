@@ -39,7 +39,7 @@ const menuItems = [
     },
     {
       label: "Hibah Penelitian External/DPPM/BRIN",
-      path: "/klasifikasi/hibah-penelitian external",
+      path: "/klasifikasi/hibah-penelitian-eksternal",
     },
     {
       label: "Kerja Sama Penelitian",
@@ -67,7 +67,7 @@ const menuItems = [
   accordionItem("Lain-lain", "ti-dots", [
     {
       label: "Kegiatan, Sosialisasi, Workshop, FGD",
-      path: "/klasifikasi/kegiatan",
+      path: "/klasifikasi/lainnya/kegiatan-sosialisasi-workshop-fgd",
     },
   ]),
   linkItem("Retensi Arsip", "ti-calendar-time", "/retensi"),

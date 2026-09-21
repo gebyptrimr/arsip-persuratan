@@ -244,7 +244,7 @@ export default function ArsipTambahForm({ configKey }) {
               </Field>
             )}
 
-            <Field label="Tahun *">
+            <Field label="Tahun">
               <input name="tahun" value={form.tahun} onChange={handleChange} style={s.input} placeholder="Contoh: 2026" />
             </Field>
             <Field label="Uraian Informasi">

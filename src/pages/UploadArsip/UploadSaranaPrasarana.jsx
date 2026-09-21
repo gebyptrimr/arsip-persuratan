@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 function InjectStyle() {
@@ -16,8 +16,8 @@ function InjectStyle() {
 
 const jenisArsip = [
   {
-    value: "spjHibah",
-    label: "SPJ Hibah",
+    value: "serahTerimabarang",
+    label: "Serah Terima Barang",
     icon: (
       <svg
         width="22"
@@ -35,38 +35,15 @@ const jenisArsip = [
       </svg>
     ),
   },
-  {
-    value: "kwitansi",
-    label: "Kwitansi",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      >
-        <path d="M3 21V9a2 2 0 012-2h4V5a2 2 0 012-2h2a2 2 0 012 2v2h4a2 2 0 012 2v12" />
-        <line x1="3" y1="21" x2="21" y2="21" />
-        <line x1="9" y1="9" x2="9" y2="9.01" />
-        <line x1="9" y1="13" x2="9" y2="13.01" />
-        <line x1="9" y1="17" x2="9" y2="17.01" />
-        <line x1="15" y1="9" x2="15" y2="9.01" />
-        <line x1="15" y1="13" x2="15" y2="13.01" />
-        <line x1="15" y1="17" x2="15" y2="17.01" />
-      </svg>
-    ),
-  },
 ];
 
-function UploadArsipLaporanKeuangan() {
-  const [jenis, setJenis] = useState("");
+function UploadSaranPrasarana() {
   const navigate = useNavigate();
 
   const handleLanjut = () => {
-    if (jenis === "spjHibah") navigate("/laporankeuangan/spjHibah-tambah");
-    else if (jenis === "kwitansi") navigate("/laporankeuangan/kwitansi-tambah");
+    navigate("/kepegawaian/serah-terima-barang-tambah"); {
+      state: { jenisArsip: "serahTerimabarang" }
+    }
   };
 
   return (
@@ -94,7 +71,7 @@ function UploadArsipLaporanKeuangan() {
           <div style={{ position: "relative", zIndex: 1 }}>
             <div style={s.cardTitle}>Upload Arsip</div>
             <div style={s.cardSub}>
-              Pilih jenis arsip Laporan Keuangan, SPJ
+              Pilih jenis arsip Proposal, SK, Kontrak, Laporan
             </div>
           </div>
         </div>
@@ -110,27 +87,22 @@ function UploadArsipLaporanKeuangan() {
           {/* Card picker */}
           <div style={s.pickerGrid}>
             {jenisArsip.map((item) => {
-              const selected = jenis === item.value;
               return (
                 <div
                   key={item.value}
-                  onClick={() => setJenis(item.value)}
                   style={{
                     ...s.pickerCard,
-                    border: selected
-                      ? "1.5px solid #1A3A5C"
-                      : "1.5px solid #E5E7EB",
-                    backgroundColor: selected ? "#F0F6FC" : "#FAFAFA",
-                    boxShadow: selected
-                      ? "0 0 0 3px rgba(26,58,92,0.08)"
-                      : "none",
+                    border: "1.5px solid #1A3A5C",
+                    backgroundColor: "#F0F6FC",
+                    boxShadow: "0 0 0 3px rgba(26,58,92,0.08)",
+                    cursor: "default",
                   }}
                 >
                   <div
                     style={{
                       ...s.pickerIcon,
-                      backgroundColor: selected ? "#1A3A5C" : "#F0F4F8",
-                      color: selected ? "#fff" : "#6B7280",
+                      backgroundColor: "#1A3A5C",
+                      color: "#fff",
                     }}
                   >
                     {item.icon}
@@ -139,7 +111,7 @@ function UploadArsipLaporanKeuangan() {
                     <div
                       style={{
                         ...s.pickerLabel,
-                        color: selected ? "#1A3A5C" : "#111827",
+                        color: "#1A3A5C",
                       }}
                     >
                       {item.label}
@@ -150,10 +122,8 @@ function UploadArsipLaporanKeuangan() {
                   <div
                     style={{
                       ...s.radioDot,
-                      border: selected
-                        ? "5px solid #1A3A5C"
-                        : "1.5px solid #D1D5DB",
-                      backgroundColor: selected ? "#fff" : "transparent",
+                      border: "5px solid #1A3A5C",
+                      backgroundColor: "#fff",
                     }}
                   />
                 </div>
@@ -166,12 +136,16 @@ function UploadArsipLaporanKeuangan() {
             <span
               role="button"
               tabIndex={0}
-              onClick={jenis ? handleLanjut : undefined}
-              onKeyDown={(e) => e.key === "Enter" && jenis && handleLanjut()}
+              onClick={handleLanjut}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleLanjut();
+                }
+              }}
               style={{
                 ...s.btnLanjut,
-                opacity: !jenis ? 0.45 : 1,
-                cursor: !jenis ? "not-allowed" : "pointer",
+                opacity: 1,
+                cursor: "pointer",
               }}
             >
               <span>Lanjut</span>
@@ -352,4 +326,4 @@ const s = {
   },
 };
 
-export default UploadArsipLaporanKeuangan;
+export default UploadSaranPrasarana;
